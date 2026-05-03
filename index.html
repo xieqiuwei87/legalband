@@ -1,0 +1,2987 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>乐队排练曲目记录</title>
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-strong: #ffffff;
+      --text: #263247;
+      --muted: #6f8197;
+      --line: rgba(98, 146, 197, 0.16);
+      --primary: #18b7a5;
+      --primary-strong: #0f8176;
+      --primary-soft: rgba(24, 183, 165, 0.1);
+      --accent: #17a0d2;
+      --danger: #ea6277;
+      --danger-soft: rgba(234, 98, 119, 0.12);
+      --shadow: 0 20px 48px rgba(114, 153, 197, 0.14);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 10%, rgba(255, 228, 181, 0.36), transparent 20%),
+        radial-gradient(circle at 92% 18%, rgba(191, 244, 234, 0.42), transparent 24%),
+        linear-gradient(180deg, #f8fdff 0%, #edf8ff 100%);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 20px;
+      padding: 30px;
+      margin-bottom: 22px;
+      border: 1px solid rgba(24, 183, 165, 0.14);
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(circle at top right, rgba(255, 209, 146, 0.28), transparent 28%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.97), rgba(238, 249, 246, 0.96));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--primary-strong);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      line-height: 1.08;
+    }
+
+    .hero-copy,
+    .muted {
+      color: var(--muted);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .module-tabs {
+      display: inline-flex;
+      gap: 10px;
+      padding: 8px;
+      width: fit-content;
+      max-width: 100%;
+      align-self: flex-start;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: inset 0 0 0 1px rgba(98, 146, 197, 0.12);
+    }
+
+    .module-tab {
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .module-tab.active {
+      background: linear-gradient(135deg, #18b7a5, #17a0d2);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(23, 160, 210, 0.18);
+    }
+
+    .module-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .danger-btn,
+    .icon-btn,
+    .mini-btn {
+      border-radius: 999px;
+      transition: transform 0.18s ease, background-color 0.18s ease, opacity 0.18s ease;
+    }
+
+    .primary-btn,
+    .ghost-btn,
+    .danger-btn {
+      padding: 11px 16px;
+    }
+
+    .mini-btn {
+      padding: 7px 12px;
+      font-size: 0.88rem;
+      background: rgba(98, 146, 197, 0.1);
+      color: var(--primary-strong);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, #18b7a5, #17a0d2);
+      color: #fff;
+    }
+
+    .ghost-btn {
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+    }
+
+    .danger-btn {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 1.4rem;
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+    }
+
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .danger-btn:hover,
+    .icon-btn:hover,
+    .mini-btn:hover,
+    .clickable-card:hover {
+      transform: translateY(-1px);
+    }
+
+    .module-panel {
+      display: grid;
+      grid-template-columns: 1.02fr 1fr;
+      gap: 22px;
+    }
+
+    .panel {
+      position: relative;
+      border: 1px solid rgba(98, 146, 197, 0.1);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .section-head,
+    .detail-header,
+    .form-actions,
+    .modal-head,
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-field {
+      display: grid;
+      gap: 6px;
+      min-width: 220px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .search-field input,
+    .form-grid input,
+    .form-grid select,
+    .form-grid textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--text);
+    }
+
+    .song-list,
+    .playlist-list,
+    .song-group {
+      display: grid;
+      gap: 14px;
+    }
+
+    .song-list,
+    .playlist-list {
+      margin-top: 20px;
+    }
+
+    .song-group-title {
+      margin-top: 8px;
+      padding-left: 4px;
+      color: var(--primary-strong);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .clickable-card,
+    .summary-card {
+      border: 1px solid rgba(98, 146, 197, 0.12);
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+    }
+
+    .clickable-card {
+      padding: 18px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .clickable-card.active {
+      border-color: rgba(24, 183, 165, 0.42);
+      box-shadow: inset 0 0 0 1px rgba(24, 183, 165, 0.14);
+    }
+
+    .clickable-card:hover,
+    .clickable-card:focus-visible {
+      box-shadow:
+        0 12px 28px rgba(114, 153, 197, 0.12),
+        inset 0 0 0 1px rgba(24, 183, 165, 0.14);
+    }
+
+    .song-title-row,
+    .playlist-title-row,
+    .playlist-song-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .playlist-song-main {
+      display: grid;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .playlist-song-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .song-meta,
+    .playlist-meta,
+    .member-list,
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .page-action-btn,
+    .detail-icon-btn,
+    .detail-section-btn,
+    .scene-tab,
+    .resource-open-link,
+    .resource-inline-btn,
+    .resource-mini-icon-btn {
+      min-height: 36px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: rgba(24, 183, 165, 0.1);
+      color: var(--primary-strong);
+      font-size: 0.84rem;
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: inset 0 0 0 1px rgba(24, 183, 165, 0.12);
+    }
+
+    .detail-icon-btn {
+      min-width: 36px;
+      padding: 0 12px;
+      font-size: 0.95rem;
+    }
+
+    .page-action-btn.danger,
+    .detail-icon-btn.danger,
+    .resource-inline-btn.danger,
+    .resource-mini-icon-btn.danger {
+      background: rgba(234, 98, 119, 0.1);
+      color: var(--danger);
+      box-shadow: inset 0 0 0 1px rgba(234, 98, 119, 0.14);
+    }
+
+    .song-meta,
+    .playlist-meta,
+    .member-list {
+      margin-top: 12px;
+    }
+
+    .tag,
+    .member-tag,
+    .index-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(24, 183, 165, 0.1);
+      color: var(--primary-strong);
+      font-size: 0.88rem;
+    }
+
+    .index-chip {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: inset 0 0 0 1px rgba(24, 183, 165, 0.12);
+      justify-content: center;
+      width: 30px;
+      min-height: 30px;
+      padding: 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .playlist-notes {
+      margin-top: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .alpha-index {
+      position: fixed;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      display: grid;
+      gap: 6px;
+      padding: 8px 5px;
+      border: 1px solid rgba(98, 146, 197, 0.14);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 16px 30px rgba(114, 153, 197, 0.16);
+    }
+
+    .alpha-index-btn {
+      width: 30px;
+      min-height: 30px;
+      padding: 0;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--primary-strong);
+      font-size: 0.82rem;
+      font-weight: 700;
+      box-shadow: inset 0 0 0 1px rgba(24, 183, 165, 0.12);
+    }
+
+    .detail-panel {
+      min-height: 520px;
+    }
+
+    .summary-card {
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .info-grid > div {
+      padding: 16px;
+      border: 1px solid rgba(98, 146, 197, 0.12);
+      border-radius: 18px;
+      background: rgba(248, 252, 255, 0.94);
+    }
+
+    .full-span {
+      grid-column: 1 / -1;
+    }
+
+    .info-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .info-value {
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .text-link {
+      color: var(--primary-strong);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .scene-tabs,
+    .scenario-switch {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .scenario-btn {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-strong);
+      font-weight: 700;
+    }
+
+    .scene-tab.active,
+    .scenario-btn.active {
+      background: linear-gradient(135deg, #18b7a5, #17a0d2);
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .lyrics-section {
+      margin-top: 16px;
+    }
+
+    .lyrics-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .lyrics-preview,
+    .lyrics-textarea {
+      width: 100%;
+      margin: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.95);
+      font-family: "SFMono-Regular", "Cascadia Code", "Consolas", "Menlo", monospace;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      resize: vertical;
+      overflow-x: auto;
+    }
+
+    .lyrics-preview {
+      min-height: 180px;
+    }
+
+    .compact-preview,
+    .compact-textarea,
+    .compact-empty {
+      min-height: 84px;
+    }
+
+    .lyrics-editor {
+      display: grid;
+      gap: 14px;
+    }
+
+    .lyrics-editor label,
+    .form-grid label,
+    .member-grid,
+    .member-select-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-empty,
+    .empty-state {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .detail-empty {
+      min-height: 220px;
+    }
+
+    .compact-empty {
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+    }
+
+    .detail-empty.compact-empty {
+      min-height: 84px;
+      padding: 12px 14px;
+    }
+
+    .empty-state {
+      min-height: 260px;
+    }
+
+    .back-btn {
+      margin-bottom: 12px;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(71, 92, 124, 0.18);
+      backdrop-filter: blur(8px);
+      z-index: 40;
+    }
+
+    .modal-card {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      border-radius: 24px;
+      background: #ffffff;
+      box-shadow: 0 28px 60px rgba(114, 153, 197, 0.22);
+      padding: 22px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .member-grid {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      background: rgba(247, 252, 255, 0.72);
+    }
+
+    .member-grid legend {
+      padding: 0 8px;
+      color: var(--muted);
+    }
+
+    .multi-picker {
+      position: relative;
+    }
+
+    .picker-toggle {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .member-select-field select,
+    .picker-toggle {
+      min-height: 58px;
+      box-shadow: inset 0 0 0 1px rgba(98, 146, 197, 0.04);
+    }
+
+    .member-select-field select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3 5.25L7 9.25L11 5.25' stroke='%23325886' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 44px;
+    }
+
+    .picker-panel input[type="checkbox"],
+    .picker-panel input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--primary);
+    }
+
+    .picker-toggle-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .picker-panel {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 12px;
+      margin-top: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 252, 255, 0.98));
+      box-shadow: 0 18px 36px rgba(114, 153, 197, 0.12);
+    }
+
+    .picker-panel label {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      white-space: nowrap;
+      padding: 10px 12px;
+      border: 1px solid rgba(98, 146, 197, 0.1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .picker-panel label:hover {
+      transform: translateY(-1px);
+      border-color: rgba(24, 183, 165, 0.2);
+      background: rgba(241, 251, 249, 0.96);
+    }
+
+    .picker-panel label.is-selected {
+      border-color: rgba(24, 183, 165, 0.3);
+      background: rgba(232, 249, 246, 0.98);
+      box-shadow: inset 0 0 0 1px rgba(24, 183, 165, 0.1);
+    }
+
+    .picker-panel label.is-hidden-option {
+      display: none;
+    }
+
+    .playlist-builder {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .playlist-box {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(248, 252, 255, 0.94);
+    }
+
+    .playlist-box h4 {
+      margin-bottom: 10px;
+    }
+
+    .playlist-picker-search {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 11px 13px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--text);
+    }
+
+    .playlist-song-option,
+    .playlist-draft-item,
+    .playlist-detail-song {
+      padding: 12px 14px;
+      border: 1px solid rgba(98, 146, 197, 0.12);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .playlist-song-option + .playlist-song-option,
+    .playlist-draft-item + .playlist-draft-item,
+    .playlist-detail-song + .playlist-detail-song {
+      margin-top: 10px;
+    }
+
+    .playlist-song-option label {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      cursor: pointer;
+    }
+
+    .playlist-song-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .playlist-song-check {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      margin-top: 2px;
+      border: 1.5px solid rgba(24, 183, 165, 0.24);
+      border-radius: 8px;
+      background: rgba(248, 252, 255, 0.96);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+    }
+
+    .playlist-song-check::after {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 3px;
+      width: 6px;
+      height: 11px;
+      border-right: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(45deg);
+      opacity: 0;
+      transition: opacity 0.18s ease;
+    }
+
+    .playlist-song-option input:checked + .playlist-song-check {
+      background: linear-gradient(135deg, #18b7a5, #17a0d2);
+      border-color: transparent;
+      box-shadow: 0 8px 18px rgba(23, 160, 210, 0.18);
+    }
+
+    .playlist-song-option input:checked + .playlist-song-check::after {
+      opacity: 1;
+    }
+
+    .playlist-song-option input:focus-visible + .playlist-song-check {
+      outline: 2px solid rgba(23, 160, 210, 0.26);
+      outline-offset: 2px;
+    }
+
+    .playlist-draft-item {
+      display: grid;
+      gap: 10px;
+    }
+
+    .playlist-draft-item .toolbar,
+    .playlist-song-row {
+      align-items: flex-start;
+    }
+
+    .playlist-order-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .playlist-detail-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .playlist-detail-song {
+      cursor: pointer;
+    }
+
+    .playlist-detail-song-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: rgba(24, 183, 165, 0.12);
+      color: var(--primary-strong);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .resource-section {
+      display: grid;
+      gap: 16px;
+    }
+
+    .resource-intro {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .resource-groups {
+      display: grid;
+      gap: 14px;
+    }
+
+    .resource-group {
+      display: grid;
+      gap: 10px;
+    }
+
+    .resource-group-title {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(24, 183, 165, 0.1);
+      color: var(--primary-strong);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .resource-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid rgba(98, 146, 197, 0.12);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 252, 255, 0.96));
+    }
+
+    .resource-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .resource-card-title {
+      font-weight: 700;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .resource-card-link {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .resource-card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .resource-card-actions.compact {
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .resource-open-link {
+      background: linear-gradient(135deg, #18b7a5, #17a0d2);
+      color: #fff;
+      text-decoration: none;
+      box-shadow: none;
+      min-width: 64px;
+    }
+
+    .resource-open-link.compact-link {
+      min-height: 32px;
+      padding: 7px 12px;
+      font-size: 0.82rem;
+      min-width: 0;
+    }
+
+    .resource-mini-icon-btn {
+      min-width: 32px;
+      min-height: 32px;
+      padding: 0 9px;
+      font-size: 0.92rem;
+    }
+
+    .resource-mini-icon-btn .btn-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .resource-note {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(98, 146, 197, 0.08);
+      color: var(--muted);
+      line-height: 1.6;
+      word-break: break-word;
+    }
+
+    .resource-editor-box {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(248, 252, 255, 0.9);
+    }
+
+    .resource-editor-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .resource-editor-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .resource-editor-empty {
+      padding: 18px 14px;
+      border: 1px dashed rgba(98, 146, 197, 0.18);
+      border-radius: 16px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .detail-content-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .context-return-bar {
+      position: sticky;
+      top: 8px;
+      z-index: 8;
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 14px;
+      padding: 8px;
+      border: 1px solid rgba(98, 146, 197, 0.12);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 12px 28px rgba(114, 153, 197, 0.12);
+    }
+
+    .detail-info-card {
+      display: grid;
+      gap: 8px;
+      padding: 15px;
+      border: 1px solid rgba(98, 146, 197, 0.12);
+      border-radius: 18px;
+      background: rgba(248, 252, 255, 0.94);
+    }
+
+    .detail-info-card.full-span {
+      grid-column: 1 / -1;
+    }
+
+    .detail-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .detail-card-title {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .detail-card-body {
+      font-size: 0.98rem;
+      line-height: 1.65;
+      word-break: break-word;
+    }
+
+    .notes-preview {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 960px) {
+      .module-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-panel {
+        min-height: auto;
+      }
+
+      .mobile-only {
+        display: inline-flex;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-shell {
+        padding: 16px;
+      }
+
+      .hero,
+      .section-head,
+      .detail-header,
+      .topbar,
+      .form-actions,
+      .modal-head,
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-grid,
+      .lyrics-preview-grid,
+      .member-grid,
+      .playlist-builder,
+      .picker-panel,
+      .info-grid,
+      .detail-content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-card {
+        padding: 16px;
+        margin-bottom: 14px;
+      }
+
+      .detail-info-card {
+        padding: 14px;
+        gap: 7px;
+        border-radius: 16px;
+      }
+
+      .detail-card-title {
+        font-size: 0.82rem;
+      }
+
+      .detail-card-body {
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      .detail-card-head {
+        align-items: flex-start;
+      }
+
+      .context-return-bar {
+        top: 6px;
+        margin-bottom: 12px;
+        padding: 7px;
+        border-radius: 16px;
+      }
+
+      .page-action-btn,
+      .detail-icon-btn,
+      .detail-section-btn,
+      .scene-tab,
+      .resource-open-link,
+      .resource-inline-btn {
+        min-height: 34px;
+        padding: 7px 11px;
+        font-size: 0.8rem;
+      }
+
+      .detail-icon-btn {
+        min-width: 34px;
+        padding: 0 11px;
+        font-size: 0.9rem;
+      }
+
+      .lyrics-preview {
+        padding: 14px;
+        font-size: 0.9rem;
+      }
+
+      .search-field {
+        min-width: 0;
+      }
+
+      .alpha-index {
+        right: 8px;
+        gap: 5px;
+        padding: 7px 4px;
+        border-radius: 16px;
+      }
+
+      .alpha-index-btn {
+        width: 28px;
+        min-height: 28px;
+        font-size: 0.78rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="topbar">
+        <div>
+          <p class="eyebrow">BAND REHEARSAL TOOL</p>
+          <h1>乐队排练曲目记录</h1>
+          <p class="hero-copy">看同一个谱、弹同一个调✌️</p>
+        </div>
+        <div class="module-tabs" role="tablist" aria-label="模块切换">
+          <button id="tab-songs" class="module-tab active" type="button" data-module="songs">🎵 曲目</button>
+          <button id="tab-playlists" class="module-tab" type="button" data-module="playlists">📋 歌单</button>
+        </div>
+      </div>
+      <div class="module-actions">
+        <button id="add-song-btn" class="primary-btn">新增曲目</button>
+        <button id="add-playlist-btn" class="primary-btn hidden">新建歌单</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="songs-module" class="module-panel">
+        <section id="song-list-view" class="panel">
+          <div class="section-head">
+            <div>
+              <h2>曲目列表</h2>
+              <p id="song-count" class="muted"></p>
+            </div>
+            <label class="search-field">
+              <span>搜索歌名</span>
+              <input id="song-search" type="search" placeholder="搜索歌名">
+            </label>
+          </div>
+          <div id="song-list" class="song-list"></div>
+          <div id="song-empty" class="empty-state hidden">
+            <p>还没有曲目，先新增一首歌吧。</p>
+          </div>
+          <div id="alpha-index" class="alpha-index hidden" aria-label="首字母索引"></div>
+        </section>
+
+        <section id="song-detail-view" class="panel detail-panel hidden">
+          <button id="song-back-btn" class="ghost-btn back-btn mobile-only">返回曲目列表</button>
+          <div id="song-detail-content"></div>
+        </section>
+      </section>
+
+      <section id="playlists-module" class="module-panel hidden">
+        <section id="playlist-list-view" class="panel">
+          <div class="section-head">
+            <div>
+              <h2>歌单列表</h2>
+              <p id="playlist-count" class="muted"></p>
+            </div>
+          </div>
+          <div id="playlist-list" class="playlist-list"></div>
+          <div id="playlist-empty" class="empty-state hidden">
+            <p>还没有歌单，先新建一个吧。</p>
+          </div>
+        </section>
+
+        <section id="playlist-detail-view" class="panel detail-panel hidden">
+          <button id="playlist-back-btn" class="ghost-btn back-btn mobile-only">返回歌单列表</button>
+          <div id="playlist-detail-content"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="song-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="song-modal-title">新增曲目</h3>
+        <button class="icon-btn" type="button" data-close="song-modal" aria-label="关闭">×</button>
+      </div>
+      <form id="song-form" class="form-grid">
+        <input id="song-id" type="hidden">
+        <label>
+          <span>曲名</span>
+          <input id="song-title" type="text" required maxlength="80" placeholder="例如：Hotel California">
+        </label>
+        <label>
+          <span>调号</span>
+          <input id="song-key" type="text" maxlength="20" placeholder="可输入 Capo 2 / F# 等">
+        </label>
+        <label>
+          <span>熟练度</span>
+          <select id="song-level" required>
+            <option value="1">很不熟练</option>
+            <option value="2">可以顺下来</option>
+            <option value="3">可以练摊儿</option>
+            <option value="4">可以去tribute演</option>
+          </select>
+        </label>
+        <div class="full-span resource-editor-box">
+          <div class="resource-editor-head">
+            <div>
+              <span class="info-label">谱子</span>
+              <p class="muted">在新增或编辑曲目时，直接维护多条资料。</p>
+            </div>
+            <button id="song-modal-add-resource-btn" type="button" class="primary-btn">新增资料</button>
+          </div>
+          <div id="song-modal-resources" class="resource-editor-list"></div>
+        </div>
+
+        <div class="full-span resource-editor-box">
+          <div class="resource-editor-head">
+            <div>
+              <span class="info-label">歌词与和弦</span>
+              <p class="muted">在新增或编辑曲目时，直接一起维护。</p>
+            </div>
+          </div>
+          <div class="lyrics-preview-grid">
+            <label>
+              <span>和弦走向</span>
+              <textarea id="song-modal-chord" rows="2" class="lyrics-textarea compact-textarea" placeholder="例如：1645"></textarea>
+            </label>
+            <label>
+              <span>歌词</span>
+              <textarea id="song-modal-lyrics" rows="10" class="lyrics-textarea"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <fieldset class="full-span member-grid">
+          <legend>乐队成员配置</legend>
+          <div class="scenario-switch full-span">
+            <button type="button" class="scenario-btn active" data-scene="withDrums">有鼓</button>
+            <button type="button" class="scenario-btn" data-scene="withoutDrums">无鼓</button>
+          </div>
+
+          <div class="member-select-field multi-picker">
+            <span>vocal</span>
+            <button id="song-vocal-toggle" class="picker-toggle" type="button" aria-expanded="false">
+              <span class="picker-toggle-text">请选择 vocal</span>
+              <span>⌄</span>
+            </button>
+            <div id="song-vocal-panel" class="picker-panel hidden">
+              <label><input type="checkbox" name="song-vocals" value="米粉儿">米粉儿</label>
+              <label><input type="checkbox" name="song-vocals" value="坤哥">坤哥</label>
+              <label><input type="checkbox" name="song-vocals" value="沈总">沈总</label>
+              <label><input type="checkbox" name="song-vocals" value="谢老师">谢老师</label>
+              <label><input type="checkbox" name="song-vocals" value="小京">小京</label>
+            </div>
+          </div>
+
+          <div class="member-select-field multi-picker">
+            <span>guitar</span>
+            <button id="song-guitar-toggle" class="picker-toggle" type="button" aria-expanded="false">
+              <span class="picker-toggle-text">请选择 guitar</span>
+              <span>⌄</span>
+            </button>
+            <div id="song-guitar-panel" class="picker-panel hidden">
+              <label><input type="checkbox" name="song-guitars" value="米粉儿">米粉儿</label>
+              <label><input type="checkbox" name="song-guitars" value="坤哥">坤哥</label>
+              <label><input type="checkbox" name="song-guitars" value="沈总">沈总</label>
+              <label><input type="checkbox" name="song-guitars" value="谢老师">谢老师</label>
+              <label><input type="checkbox" name="song-guitars" value="小京">小京</label>
+            </div>
+          </div>
+
+          <div class="member-select-field multi-picker">
+            <span>bass</span>
+            <button id="song-bass-toggle" class="picker-toggle" type="button" aria-expanded="false">
+              <span class="picker-toggle-text">请选择 bass</span>
+              <span>⌄</span>
+            </button>
+            <div id="song-bass-panel" class="picker-panel hidden">
+              <label><input type="radio" name="song-bass-choice" value="" checked>不选</label>
+              <label><input type="radio" name="song-bass-choice" value="米粉儿">米粉儿</label>
+              <label><input type="radio" name="song-bass-choice" value="坤哥">坤哥</label>
+              <label><input type="radio" name="song-bass-choice" value="沈总">沈总</label>
+              <label><input type="radio" name="song-bass-choice" value="谢老师">谢老师</label>
+              <label><input type="radio" name="song-bass-choice" value="小京">小京</label>
+            </div>
+          </div>
+
+          <div class="member-select-field multi-picker">
+            <span>drum</span>
+            <button id="song-drum-toggle" class="picker-toggle" type="button" aria-expanded="false">
+              <span class="picker-toggle-text">请选择 drum</span>
+              <span>⌄</span>
+            </button>
+            <div id="song-drum-panel" class="picker-panel hidden">
+              <label data-empty-drum-option><input type="radio" name="song-drum-choice" value="">不选</label>
+              <label><input type="radio" name="song-drum-choice" value="米粉儿">米粉儿</label>
+              <label><input type="radio" name="song-drum-choice" value="坤哥">坤哥</label>
+              <label><input type="radio" name="song-drum-choice" value="沈总">沈总</label>
+              <label><input type="radio" name="song-drum-choice" value="谢老师" checked>谢老师</label>
+              <label><input type="radio" name="song-drum-choice" value="小京">小京</label>
+            </div>
+          </div>
+
+          <div class="member-select-field multi-picker">
+            <span>keyboard</span>
+            <button id="song-keyboard-toggle" class="picker-toggle" type="button" aria-expanded="false">
+              <span class="picker-toggle-text">请选择 keyboard</span>
+              <span>⌄</span>
+            </button>
+            <div id="song-keyboard-panel" class="picker-panel hidden">
+              <label><input type="radio" name="song-keyboard-choice" value="米粉儿">米粉儿</label>
+              <label><input type="radio" name="song-keyboard-choice" value="坤哥">坤哥</label>
+              <label><input type="radio" name="song-keyboard-choice" value="沈总">沈总</label>
+              <label><input type="radio" name="song-keyboard-choice" value="谢老师">谢老师</label>
+              <label><input type="radio" name="song-keyboard-choice" value="小京" checked>小京</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="form-actions full-span">
+          <button type="button" class="ghost-btn" data-close="song-modal">取消</button>
+          <button type="submit" class="primary-btn">保存曲目</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="playlist-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="playlist-modal-title">新建歌单</h3>
+        <button class="icon-btn" type="button" data-close="playlist-modal" aria-label="关闭">×</button>
+      </div>
+      <form id="playlist-form" class="form-grid">
+        <input id="playlist-id" type="hidden">
+        <label>
+          <span>歌单名称</span>
+          <input id="playlist-name" type="text" required maxlength="80" placeholder="例如：周末路演歌单">
+        </label>
+        <label>
+          <span>场景类型</span>
+          <select id="playlist-scene" required>
+            <option value="路边演出">路边演出</option>
+            <option value="tribute酒吧">tribute酒吧</option>
+            <option value="婚礼">婚礼</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <label class="full-span">
+          <span>备注</span>
+          <textarea id="playlist-notes" rows="4" placeholder="可记录节奏安排、串场说明、演出注意事项"></textarea>
+        </label>
+        <div class="full-span playlist-builder">
+          <div class="playlist-box">
+            <h4>从已有曲目中选择</h4>
+            <input id="playlist-song-search" class="playlist-picker-search" type="search" placeholder="搜索曲目名称">
+            <div id="playlist-song-options"></div>
+          </div>
+          <div class="playlist-box">
+            <h4>已选曲目顺序</h4>
+            <div id="playlist-selected-list"></div>
+          </div>
+        </div>
+        <div class="form-actions full-span">
+          <button type="button" class="ghost-btn" data-close="playlist-modal">取消</button>
+          <button type="submit" class="primary-btn">保存歌单</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="resource-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="resource-modal-title">新增资料</h3>
+        <button class="icon-btn" type="button" data-close="resource-modal" aria-label="关闭">×</button>
+      </div>
+      <form id="resource-form" class="form-grid">
+        <input id="resource-context" type="hidden">
+        <input id="resource-song-id" type="hidden">
+        <input id="resource-id" type="hidden">
+        <label class="full-span">
+          <span>资源标题</span>
+          <input id="resource-title" type="text" required maxlength="120" placeholder="例如：Solo视频 / 和弦图 / 演出版本">
+        </label>
+        <label class="full-span">
+          <span>链接</span>
+          <input id="resource-url" type="text" required maxlength="500" placeholder="可粘贴网页、视频、网盘、App deep link 等任意链接">
+        </label>
+        <label class="full-span">
+          <span>备注</span>
+          <textarea id="resource-note" rows="3" placeholder="可记录版本说明、开头提示、使用场景"></textarea>
+        </label>
+        <div class="form-actions full-span">
+          <button type="button" class="ghost-btn" data-close="resource-modal">取消</button>
+          <button type="submit" class="primary-btn">保存资料</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const SONG_STORAGE_KEY = "band-rehearsal-tracker-v1";
+    const SONG_STORAGE_FALLBACK_KEY = "band-rehearsal-tracker-songs-v2";
+    const PLAYLIST_STORAGE_KEY = "band-rehearsal-tracker-playlists-v1";
+    const DEFAULT_LYRICS_TEMPLATE = ["Intro", "A段主歌", "B段副歌", "桥段", "结尾"]
+      .map((section) => `[${section}]`)
+      .join("\n\n");
+    const LEVEL_LABELS = {
+      1: "很不熟练",
+      2: "可以顺下来",
+      3: "可以练摊儿",
+      4: "可以去tribute演"
+    };
+    const DEFAULT_BAND_SETUP = {
+      vocals: ["米粉儿"],
+      guitars: ["坤哥", "沈总"],
+      bass: "",
+      drum: "谢老师",
+      keyboard: "小京"
+    };
+    const BAND_SCENES = {
+      withDrums: "有鼓",
+      withoutDrums: "无鼓"
+    };
+
+    const state = {
+      module: "songs",
+      songs: loadSongs(),
+      playlists: loadPlaylists(),
+      selectedSongId: null,
+      selectedPlaylistId: null,
+      songSearch: "",
+      playlistSongSearch: "",
+      songDetailSource: "songs",
+      songMobileView: "list",
+      playlistMobileView: "list",
+      songDraftResources: [],
+      editingBandScene: "withDrums",
+      editingBandSetupScenes: createDefaultBandSetupScenes(),
+      viewingBandScene: "withDrums",
+      playlistDraftSongIds: []
+    };
+
+    const elements = {
+      tabSongs: document.getElementById("tab-songs"),
+      tabPlaylists: document.getElementById("tab-playlists"),
+      songsModule: document.getElementById("songs-module"),
+      playlistsModule: document.getElementById("playlists-module"),
+      addSongBtn: document.getElementById("add-song-btn"),
+      addPlaylistBtn: document.getElementById("add-playlist-btn"),
+      songSearch: document.getElementById("song-search"),
+      songCount: document.getElementById("song-count"),
+      songList: document.getElementById("song-list"),
+      songEmpty: document.getElementById("song-empty"),
+      songDetailView: document.getElementById("song-detail-view"),
+      songDetailContent: document.getElementById("song-detail-content"),
+      songListView: document.getElementById("song-list-view"),
+      songBackBtn: document.getElementById("song-back-btn"),
+      alphaIndex: document.getElementById("alpha-index"),
+      playlistCount: document.getElementById("playlist-count"),
+      playlistList: document.getElementById("playlist-list"),
+      playlistEmpty: document.getElementById("playlist-empty"),
+      playlistDetailView: document.getElementById("playlist-detail-view"),
+      playlistDetailContent: document.getElementById("playlist-detail-content"),
+      playlistListView: document.getElementById("playlist-list-view"),
+      playlistBackBtn: document.getElementById("playlist-back-btn"),
+      songModal: document.getElementById("song-modal"),
+      songForm: document.getElementById("song-form"),
+      songModalResources: document.getElementById("song-modal-resources"),
+      songModalAddResourceBtn: document.getElementById("song-modal-add-resource-btn"),
+      resourceModal: document.getElementById("resource-modal"),
+      resourceForm: document.getElementById("resource-form"),
+      playlistModal: document.getElementById("playlist-modal"),
+      playlistForm: document.getElementById("playlist-form"),
+      playlistSongOptions: document.getElementById("playlist-song-options"),
+      playlistSelectedList: document.getElementById("playlist-selected-list"),
+      playlistSongSearch: document.getElementById("playlist-song-search")
+    };
+
+    bootstrap();
+
+    function bootstrap() {
+      if (state.songs.length > 0) {
+        state.selectedSongId = state.songs[0].id;
+      }
+      if (state.playlists.length > 0) {
+        state.selectedPlaylistId = state.playlists[0].id;
+      }
+
+      bindEvents();
+      render();
+    }
+
+    function bindEvents() {
+      elements.tabSongs.addEventListener("click", () => switchModule("songs"));
+      elements.tabPlaylists.addEventListener("click", () => switchModule("playlists"));
+      elements.addSongBtn.addEventListener("click", () => openSongModal());
+      elements.addPlaylistBtn.addEventListener("click", () => openPlaylistModal());
+      elements.songSearch.addEventListener("input", (event) => {
+        state.songSearch = event.target.value.trim().toLowerCase();
+        renderSongList();
+      });
+      elements.playlistSongSearch.addEventListener("input", (event) => {
+        state.playlistSongSearch = event.target.value.trim().toLowerCase();
+        renderPlaylistBuilder();
+      });
+      elements.songBackBtn.addEventListener("click", () => {
+        if (state.songDetailSource === "playlist" && state.selectedPlaylistId) {
+          state.module = "playlists";
+          state.playlistMobileView = "detail";
+        } else {
+          state.songMobileView = "list";
+        }
+        syncMobileLayout();
+        renderModuleTabs();
+        renderModuleViews();
+      });
+      elements.playlistBackBtn.addEventListener("click", () => {
+        state.playlistMobileView = "list";
+        syncMobileLayout();
+      });
+
+      elements.songForm.addEventListener("submit", handleSongSubmit);
+      elements.resourceForm.addEventListener("submit", handleResourceSubmit);
+      elements.playlistForm.addEventListener("submit", handlePlaylistSubmit);
+      elements.songModalAddResourceBtn.addEventListener("click", () => openResourceModal(null, null, "song-modal"));
+      elements.songModalResources.addEventListener("click", handleSongModalResourceActions);
+      bindMultiPicker("song-vocal-toggle", "song-vocal-panel", "song-vocals", "请选择 vocal");
+      bindMultiPicker("song-guitar-toggle", "song-guitar-panel", "song-guitars", "请选择 guitar");
+      bindSinglePicker("song-bass-toggle", "song-bass-panel", "song-bass-choice", "请选择 bass");
+      bindSinglePicker("song-drum-toggle", "song-drum-panel", "song-drum-choice", "请选择 drum");
+      bindSinglePicker("song-keyboard-toggle", "song-keyboard-panel", "song-keyboard-choice", "请选择 keyboard");
+      bindBandSceneSwitch();
+
+      document.querySelectorAll("[data-close]").forEach((button) => {
+        button.addEventListener("click", () => closeModal(button.dataset.close));
+      });
+
+      [elements.songModal, elements.playlistModal, elements.resourceModal].forEach((modal) => {
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) {
+            closeModal(modal.id);
+          }
+        });
+      });
+
+      window.addEventListener("resize", syncMobileLayout);
+    }
+
+    function switchModule(module) {
+      state.module = module;
+      if (module === "songs") {
+        state.songDetailSource = "songs";
+      }
+      renderModuleTabs();
+      renderModuleViews();
+      syncMobileLayout();
+    }
+
+    function render() {
+      renderModuleTabs();
+      renderSongList();
+      renderSongDetail();
+      renderPlaylistList();
+      renderPlaylistDetail();
+      renderModuleViews();
+      syncMobileLayout();
+    }
+
+    function renderModuleTabs() {
+      const isSongs = state.module === "songs";
+      elements.tabSongs.classList.toggle("active", isSongs);
+      elements.tabPlaylists.classList.toggle("active", !isSongs);
+      elements.addSongBtn.classList.toggle("hidden", !isSongs);
+      elements.addPlaylistBtn.classList.toggle("hidden", isSongs);
+    }
+
+    function renderModuleViews() {
+      const isSongs = state.module === "songs";
+      elements.songsModule.classList.toggle("hidden", !isSongs);
+      elements.playlistsModule.classList.toggle("hidden", isSongs);
+      elements.alphaIndex.classList.toggle("hidden", !isSongs || elements.alphaIndex.innerHTML === "");
+    }
+
+    function renderSongList() {
+      const filteredSongs = getFilteredSongs();
+      elements.songCount.textContent = `共 ${filteredSongs.length} 首曲目`;
+      elements.songEmpty.classList.toggle("hidden", state.songs.length !== 0);
+      elements.songList.innerHTML = "";
+      elements.alphaIndex.innerHTML = "";
+      elements.alphaIndex.classList.add("hidden");
+
+      if (filteredSongs.length === 0 && state.songs.length > 0) {
+        elements.songList.innerHTML = `<div class="detail-empty"><p>没有匹配的曲目。</p></div>`;
+        return;
+      }
+
+      const groupedSongs = groupSongsByInitial(filteredSongs);
+      groupedSongs.forEach(({ initial, songs }) => {
+        const group = document.createElement("section");
+        group.className = "song-group";
+        group.id = `group-${initial === "#" ? "hash" : initial.toLowerCase()}`;
+        group.innerHTML = `<h3 class="song-group-title">${escapeHtml(initial)}</h3>`;
+
+        songs.forEach((song) => {
+          const resources = normalizeSongResources(song);
+          const card = document.createElement("article");
+          card.className = `clickable-card${song.id === state.selectedSongId ? " active" : ""}`;
+          card.tabIndex = 0;
+          card.setAttribute("role", "button");
+          card.setAttribute("aria-label", `查看曲目 ${song.title}`);
+          card.dataset.action = "view-song";
+          card.dataset.id = song.id;
+          card.innerHTML = `
+            <div class="song-title-row">
+              <h3>${escapeHtml(song.title)}</h3>
+            </div>
+            <div class="song-meta">
+              <span class="tag">调号 ${escapeHtml(song.key || "未填写")}</span>
+              <span class="tag">${escapeHtml(renderLevel(song.level))}</span>
+              ${resources.length ? `<span class="tag">有资料</span>` : ""}
+              ${song.chordProgression || song.lyrics ? `<span class="tag">有歌词与和弦</span>` : ""}
+            </div>
+          `;
+          group.appendChild(card);
+        });
+
+        elements.songList.appendChild(group);
+      });
+
+      renderAlphaIndex(groupedSongs);
+
+      elements.songList.querySelectorAll('.clickable-card[data-action="view-song"]').forEach((card) => {
+        bindCardAction(card, handleSongActions);
+      });
+    }
+
+    function renderAlphaIndex(groupedSongs) {
+      if (!groupedSongs.length) {
+        return;
+      }
+
+      elements.alphaIndex.innerHTML = groupedSongs.map(({ initial }) => `
+        <button type="button" class="alpha-index-btn" data-letter-target="${initial}">${escapeHtml(initial)}</button>
+      `).join("");
+      elements.alphaIndex.classList.remove("hidden");
+
+      elements.alphaIndex.querySelectorAll("[data-letter-target]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const initial = button.dataset.letterTarget;
+          const targetId = `group-${initial === "#" ? "hash" : initial.toLowerCase()}`;
+          const target = document.getElementById(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+    }
+
+    function renderSongDetail() {
+      const song = findSong(state.selectedSongId);
+      elements.songBackBtn.classList.toggle("hidden", state.songDetailSource === "playlist");
+      if (!song) {
+        elements.songDetailContent.innerHTML = `
+          <div class="detail-empty">
+            <div>
+              <h3>选择一首曲目查看详情</h3>
+              <p>你可以从左侧列表进入，或先新增曲目。</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const resources = normalizeSongResources(song);
+      const chordsPreview = song.chordProgression
+        ? `<pre class="lyrics-preview compact-preview">${escapeHtml(song.chordProgression)}</pre>`
+        : `<div class="detail-empty compact-empty"><p>还没有填写和弦走向。</p></div>`;
+      const lyricsPreview = song.lyrics
+        ? `<pre class="lyrics-preview">${escapeHtml(song.lyrics)}</pre>`
+        : `<div class="detail-empty compact-empty"><p>还没有填写歌词。</p></div>`;
+      const playlistReturnBar = state.songDetailSource === "playlist" && state.selectedPlaylistId
+        ? `
+          <div class="context-return-bar">
+            <button class="page-action-btn" type="button" data-action="return-to-playlist">返回歌单</button>
+          </div>
+        `
+        : "";
+
+      elements.songDetailContent.innerHTML = `
+        ${playlistReturnBar}
+        <section class="summary-card">
+          <div class="detail-header">
+            <div>
+              <h2>${escapeHtml(song.title)}</h2>
+              <p class="muted">曲目信息</p>
+            </div>
+            <div class="inline-actions">
+              <button class="page-action-btn" type="button" data-action="edit-song" data-id="${song.id}" aria-label="编辑曲目" title="编辑曲目">🖊️ 编辑</button>
+              <button class="page-action-btn danger" type="button" data-action="delete-song" data-id="${song.id}" aria-label="删除曲目" title="删除曲目">🗑️ 删除</button>
+            </div>
+          </div>
+        </section>
+        <section class="summary-card">
+          <div class="detail-content-grid">
+            <article class="detail-info-card">
+              <div class="detail-card-title">曲名</div>
+              <div class="detail-card-body">${escapeHtml(song.title)}</div>
+            </article>
+            <article class="detail-info-card">
+              <div class="detail-card-title">调号</div>
+              <div class="detail-card-body">${escapeHtml(song.key || "未填写")}</div>
+            </article>
+            <article class="detail-info-card">
+              <div class="detail-card-title">熟练度</div>
+              <div class="detail-card-body">${escapeHtml(renderLevel(song.level))}</div>
+            </article>
+            <article class="detail-info-card full-span">
+              <div class="detail-card-head">
+                <div class="detail-card-title">谱子</div>
+              </div>
+              <div class="detail-card-body">${renderSongResourcesContent(song, resources)}</div>
+            </article>
+            <article class="detail-info-card full-span">
+              <div class="detail-card-title">乐队成员配置</div>
+              <div class="detail-card-body">${renderBandSetupTabs(song.bandSetup)}</div>
+            </article>
+            <article class="detail-info-card full-span">
+              <div class="detail-card-title">歌词与和弦</div>
+              <div class="detail-card-body">
+                <div class="lyrics-preview-grid">
+                  <div>
+                    <p class="info-label">和弦走向</p>
+                    ${chordsPreview}
+                  </div>
+                  <div>
+                    <p class="info-label">歌词</p>
+                    ${lyricsPreview}
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+      `;
+
+      elements.songDetailContent.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", handleSongActions);
+      });
+    }
+
+    function renderSongResourcesContent(song, resources) {
+      if (!resources.length) {
+        return `
+          <div class="detail-empty compact-empty">
+            <div>
+              <p>还没有资料。</p>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="resource-groups">
+          ${resources.map((resource) => renderResourceCard(song.id, resource)).join("")}
+        </div>
+      `;
+    }
+
+    function renderResourceCard(songId, resource) {
+      return `
+        <article class="resource-card">
+          <div class="resource-card-head">
+            <div class="resource-card-title">${escapeHtml(resource.title)}</div>
+            <div class="resource-card-actions compact">
+              <a class="resource-open-link compact-link" href="${escapeAttribute(resource.url)}" target="_blank" rel="noreferrer">打开</a>
+            </div>
+          </div>
+          <div class="resource-card-link">${escapeHtml(resource.url)}</div>
+          ${resource.note ? `<p class="resource-note">${escapeHtml(resource.note)}</p>` : ""}
+        </article>
+      `;
+    }
+
+    function renderSongModalResources() {
+      if (!elements.songModalResources) {
+        return;
+      }
+
+      if (!state.songDraftResources.length) {
+        elements.songModalResources.innerHTML = `
+          <div class="resource-editor-empty">
+            还没有添加资料。<br>可以直接在这里维护多条谱子、视频或参考链接。
+          </div>
+        `;
+        return;
+      }
+
+      elements.songModalResources.innerHTML = state.songDraftResources.map((resource) => `
+        <article class="resource-card">
+          <div class="resource-card-head">
+            <div class="resource-card-title">${escapeHtml(resource.title)}</div>
+            <div class="resource-card-actions compact">
+              <button class="resource-mini-icon-btn" type="button" data-song-modal-action="edit-resource" data-id="${resource.id}" aria-label="编辑资料" title="编辑资料">✎<span class="btn-label">编辑</span></button>
+              <button class="resource-mini-icon-btn danger" type="button" data-song-modal-action="delete-resource" data-id="${resource.id}" aria-label="删除资料" title="删除资料">🗑<span class="btn-label">删除</span></button>
+            </div>
+          </div>
+          <div class="resource-card-link">${escapeHtml(resource.url)}</div>
+          ${resource.note ? `<p class="resource-note">${escapeHtml(resource.note)}</p>` : ""}
+        </article>
+      `).join("");
+    }
+
+    function renderPlaylistList() {
+      elements.playlistCount.textContent = `共 ${state.playlists.length} 个歌单`;
+      elements.playlistEmpty.classList.toggle("hidden", state.playlists.length !== 0);
+      elements.playlistList.innerHTML = "";
+
+      if (state.playlists.length === 0) {
+        return;
+      }
+
+      state.playlists.forEach((playlist) => {
+        const songs = playlist.songIds.map(findSong).filter(Boolean);
+        const card = document.createElement("article");
+        card.className = `clickable-card${playlist.id === state.selectedPlaylistId ? " active" : ""}`;
+        card.tabIndex = 0;
+        card.setAttribute("role", "button");
+        card.setAttribute("aria-label", `查看歌单 ${playlist.name}`);
+        card.dataset.action = "view-playlist";
+        card.dataset.id = playlist.id;
+        card.innerHTML = `
+          <div class="playlist-title-row">
+            <h3>${escapeHtml(playlist.name)}</h3>
+          </div>
+          <div class="playlist-meta">
+            <span class="tag">${escapeHtml(playlist.scene)}</span>
+            <span class="tag">${songs.length} 首曲目</span>
+          </div>
+          <p class="playlist-notes notes-preview">${escapeHtml(playlist.notes || "暂无备注")}</p>
+        `;
+        elements.playlistList.appendChild(card);
+      });
+
+      elements.playlistList.querySelectorAll('.clickable-card[data-action="view-playlist"]').forEach((card) => {
+        bindCardAction(card, handlePlaylistActions);
+      });
+    }
+
+    function renderPlaylistDetail() {
+      const playlist = findPlaylist(state.selectedPlaylistId);
+      if (!playlist) {
+        elements.playlistDetailContent.innerHTML = `
+          <div class="detail-empty">
+            <div>
+              <h3>选择一个歌单查看详情</h3>
+              <p>你可以从左侧列表进入，或先新建歌单。</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const songs = playlist.songIds.map(findSong).filter(Boolean);
+      elements.playlistDetailContent.innerHTML = `
+        <section class="summary-card">
+          <div class="detail-header">
+            <div>
+              <h2>${escapeHtml(playlist.name)}</h2>
+              <p class="muted">${escapeHtml(playlist.scene)} · ${songs.length} 首曲目</p>
+            </div>
+            <div class="inline-actions">
+              <button class="page-action-btn" type="button" data-action="edit-playlist" data-id="${playlist.id}" aria-label="编辑歌单" title="编辑歌单">🖊️ 编辑</button>
+              <button class="page-action-btn danger" type="button" data-action="delete-playlist" data-id="${playlist.id}" aria-label="删除歌单" title="删除歌单">🗑️ 删除</button>
+            </div>
+          </div>
+        </section>
+        <section class="summary-card info-grid">
+          <div>
+            <p class="info-label">歌单名称</p>
+            <p class="info-value">${escapeHtml(playlist.name)}</p>
+          </div>
+          <div>
+            <p class="info-label">场景类型</p>
+            <p class="info-value">${escapeHtml(playlist.scene)}</p>
+          </div>
+          <div class="full-span">
+            <p class="info-label">备注</p>
+            <p class="info-value">${escapeHtml(playlist.notes || "暂无备注")}</p>
+          </div>
+        </section>
+        <section class="summary-card">
+          <div class="detail-header">
+            <div>
+              <h2>曲目清单</h2>
+              <p class="muted">点击单曲可进入曲目详情，适合排练和演出时快速查看。</p>
+            </div>
+          </div>
+          <div class="playlist-detail-list">
+            ${songs.length ? songs.map((song, index) => renderPlaylistSongDetailItem(song, index)).join("") : `<div class="detail-empty"><p>这个歌单里还没有曲目。</p></div>`}
+          </div>
+        </section>
+      `;
+
+      elements.playlistDetailContent.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", handlePlaylistActions);
+      });
+      elements.playlistDetailContent.querySelectorAll('[data-action="open-song-from-playlist"]').forEach((card) => {
+        bindCardAction(card, handlePlaylistActions);
+      });
+    }
+
+    function renderPlaylistSongDetailItem(song, index) {
+      const bandSummary = summarizeBandSetup(normalizeBandSetupScenes(song.bandSetup).withDrums);
+      return `
+        <article class="playlist-detail-song" tabindex="0" role="button" data-action="open-song-from-playlist" data-song-id="${song.id}" aria-label="查看曲目 ${escapeHtml(song.title)}">
+          <div class="playlist-song-row">
+            <div class="playlist-song-main">
+              <div class="playlist-song-top">
+              <span class="playlist-detail-song-number">${index + 1}</span>
+                <div>
+                <h3>${escapeHtml(song.title)}</h3>
+                </div>
+              </div>
+              <div class="playlist-meta">
+                <span class="tag">调号 ${escapeHtml(song.key || "未填写")}</span>
+                <span class="tag">${escapeHtml(renderLevel(song.level))}</span>
+              </div>
+            </div>
+          </div>
+          <div class="member-list">
+            <span class="member-tag">${escapeHtml(bandSummary)}</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function handleSongActions(event) {
+      const { action, id, songId, scene } = event.currentTarget.dataset;
+
+      if (action === "view-song") {
+        state.songDetailSource = "songs";
+        state.selectedSongId = id;
+        state.viewingBandScene = "withDrums";
+        if (window.innerWidth <= 960) {
+          state.songMobileView = "detail";
+        }
+        renderSongList();
+        renderSongDetail();
+        syncMobileLayout();
+        return;
+      }
+
+      if (action === "edit-song") {
+        openSongModal(findSong(id));
+        return;
+      }
+
+      if (action === "delete-song") {
+        deleteSong(id);
+        return;
+      }
+
+      if (action === "return-to-playlist") {
+        state.module = "playlists";
+        state.playlistMobileView = "detail";
+        renderModuleTabs();
+        renderModuleViews();
+        syncMobileLayout();
+        return;
+      }
+
+      if (action === "switch-band-scene") {
+        state.viewingBandScene = scene || "withDrums";
+        renderSongDetail();
+        return;
+      }
+
+      if (action === "add-resource") {
+        openResourceModal(songId);
+        return;
+      }
+
+      if (action === "edit-resource") {
+        openResourceModal(songId, getSongResource(songId, id));
+        return;
+      }
+
+      if (action === "delete-resource") {
+        deleteResource(songId, id);
+        return;
+      }
+
+    }
+
+    function handlePlaylistActions(event) {
+      const { action, id, songId } = event.currentTarget.dataset;
+
+      if (action === "view-playlist") {
+        state.selectedPlaylistId = id;
+        if (window.innerWidth <= 960) {
+          state.playlistMobileView = "detail";
+        }
+        renderPlaylistList();
+        renderPlaylistDetail();
+        syncMobileLayout();
+        return;
+      }
+
+      if (action === "edit-playlist") {
+        openPlaylistModal(findPlaylist(id));
+        return;
+      }
+
+      if (action === "delete-playlist") {
+        deletePlaylist(id);
+        return;
+      }
+
+      if (action === "open-song-from-playlist") {
+        state.module = "songs";
+        state.songDetailSource = "playlist";
+        state.selectedSongId = songId;
+        state.viewingBandScene = "withDrums";
+        if (window.innerWidth <= 960) {
+          state.songMobileView = "detail";
+        }
+        render();
+      }
+    }
+
+    function handleSongModalResourceActions(event) {
+      const actionTarget = event.target.closest("[data-song-modal-action]");
+      if (!actionTarget) {
+        return;
+      }
+
+      const { songModalAction, id } = actionTarget.dataset;
+      const resource = state.songDraftResources.find((item) => item.id === id);
+
+      if (songModalAction === "edit-resource" && resource) {
+        openResourceModal(null, resource, "song-modal");
+        return;
+      }
+
+      if (songModalAction === "delete-resource" && resource) {
+        if (!window.confirm(`确认删除资料“${resource.title}”？`)) {
+          return;
+        }
+        state.songDraftResources = state.songDraftResources.filter((item) => item.id !== id);
+        renderSongModalResources();
+      }
+    }
+
+    function handleSongSubmit(event) {
+      event.preventDefault();
+      const id = document.getElementById("song-id").value || createId();
+      const existing = findSong(id);
+      const song = {
+        id,
+        title: document.getElementById("song-title").value.trim(),
+        key: document.getElementById("song-key").value.trim(),
+        level: Number(document.getElementById("song-level").value),
+        chartLink: "",
+        bandSetup: readBandSetupFromSongForm(state.editingBandSetupScenes),
+        resources: state.songDraftResources.map((resource, index) => normalizeResourceItem(resource, index)),
+        chordProgression: normalizeMultilineText(document.getElementById("song-modal-chord").value).trim(),
+        lyrics: normalizeMultilineText(document.getElementById("song-modal-lyrics").value || DEFAULT_LYRICS_TEMPLATE)
+      };
+
+      if (!song.title) {
+        return;
+      }
+
+      if (existing) {
+        Object.assign(existing, song);
+      } else {
+        state.songs.unshift(song);
+        state.selectedSongId = song.id;
+      }
+
+      persistSongs();
+      closeModal("song-modal");
+      render();
+    }
+
+    function handlePlaylistSubmit(event) {
+      event.preventDefault();
+      const id = document.getElementById("playlist-id").value || createId();
+      const existing = findPlaylist(id);
+      const playlist = {
+        id,
+        name: document.getElementById("playlist-name").value.trim(),
+        scene: document.getElementById("playlist-scene").value,
+        notes: document.getElementById("playlist-notes").value.trim(),
+        songIds: state.playlistDraftSongIds.filter((songId, index, list) => list.indexOf(songId) === index)
+      };
+
+      if (!playlist.name) {
+        return;
+      }
+
+      if (existing) {
+        Object.assign(existing, playlist);
+      } else {
+        state.playlists.unshift(playlist);
+        state.selectedPlaylistId = playlist.id;
+      }
+
+      persistPlaylists();
+      closeModal("playlist-modal");
+      render();
+    }
+
+    function handleResourceSubmit(event) {
+      event.preventDefault();
+      const context = document.getElementById("resource-context").value || "detail";
+      const songId = document.getElementById("resource-song-id").value;
+      const resourceId = document.getElementById("resource-id").value || createId();
+      const nextResource = {
+        id: resourceId,
+        role: "",
+        title: document.getElementById("resource-title").value.trim(),
+        type: "其他",
+        url: document.getElementById("resource-url").value.trim(),
+        note: document.getElementById("resource-note").value.trim()
+      };
+
+      if (!nextResource.title || !nextResource.url) {
+        return;
+      }
+
+      if (context === "song-modal") {
+        state.songDraftResources = state.songDraftResources.filter((resource) => resource.id !== resourceId);
+        state.songDraftResources.push(nextResource);
+        closeModal("resource-modal");
+        renderSongModalResources();
+        return;
+      }
+
+      const song = findSong(songId);
+      if (!song) {
+        return;
+      }
+
+      const editingResource = getSongResource(songId, resourceId);
+      if (editingResource?.legacySource === "chartLink") {
+        song.chartLink = "";
+      }
+
+      song.resources = normalizeSongResources(song).filter((resource) => resource.id !== resourceId && resource.legacySource !== "chartLink");
+      song.resources.push(nextResource);
+      song.resources = syncLegacyChartLinkResource(song.resources, song.chartLink);
+      persistSongs();
+      closeModal("resource-modal");
+      renderSongDetail();
+    }
+
+    function openSongModal(song) {
+      document.getElementById("song-modal-title").textContent = song ? "编辑曲目" : "新增曲目";
+      document.getElementById("song-id").value = song?.id || "";
+      document.getElementById("song-title").value = song?.title || "";
+      document.getElementById("song-key").value = song?.key || "";
+      document.getElementById("song-level").value = String(normalizeLevel(song?.level || 2));
+      document.getElementById("song-modal-chord").value = song?.chordProgression || "";
+      document.getElementById("song-modal-lyrics").value = song?.lyrics || DEFAULT_LYRICS_TEMPLATE;
+      state.songDraftResources = normalizeSongResources(song || {}).map((resource, index) => normalizeResourceItem(resource, index));
+      state.editingBandScene = "withDrums";
+      state.editingBandSetupScenes = normalizeBandSetupScenes(song?.bandSetup || createDefaultBandSetupScenes());
+      applyBandSetupToSongForm(state.editingBandSetupScenes);
+      renderSongModalResources();
+      openModal("song-modal");
+      setTimeout(() => document.getElementById("song-title").focus(), 30);
+    }
+
+    function openResourceModal(songId, resource, context = "detail") {
+      document.getElementById("resource-modal-title").textContent = resource ? "编辑资料" : "新增资料";
+      document.getElementById("resource-context").value = context;
+      document.getElementById("resource-song-id").value = songId;
+      document.getElementById("resource-id").value = resource?.id || "";
+      document.getElementById("resource-title").value = resource?.title || "";
+      document.getElementById("resource-url").value = resource?.url || "";
+      document.getElementById("resource-note").value = resource?.note || "";
+      openModal("resource-modal");
+      setTimeout(() => document.getElementById("resource-title").focus(), 30);
+    }
+
+    function openPlaylistModal(playlist) {
+      document.getElementById("playlist-modal-title").textContent = playlist ? "编辑歌单" : "新建歌单";
+      document.getElementById("playlist-id").value = playlist?.id || "";
+      document.getElementById("playlist-name").value = playlist?.name || "";
+      document.getElementById("playlist-scene").value = playlist?.scene || "路边演出";
+      document.getElementById("playlist-notes").value = playlist?.notes || "";
+      state.playlistSongSearch = "";
+      if (elements.playlistSongSearch) {
+        elements.playlistSongSearch.value = "";
+      }
+      state.playlistDraftSongIds = playlist ? [...playlist.songIds] : [];
+      renderPlaylistBuilder();
+      openModal("playlist-modal");
+      setTimeout(() => document.getElementById("playlist-name").focus(), 30);
+    }
+
+    function renderPlaylistBuilder() {
+      if (state.songs.length === 0) {
+        elements.playlistSongOptions.innerHTML = `<p class="muted">请先在曲目模块创建曲目，再来建歌单。</p>`;
+        elements.playlistSelectedList.innerHTML = `<p class="muted">暂无可选曲目。</p>`;
+        return;
+      }
+
+      const filteredSongs = state.songs.filter((song) => {
+        if (!state.playlistSongSearch) {
+          return true;
+        }
+        return song.title.toLowerCase().includes(state.playlistSongSearch);
+      });
+
+      elements.playlistSongOptions.innerHTML = filteredSongs.length ? filteredSongs.map((song) => `
+        <div class="playlist-song-option">
+          <label>
+            <input type="checkbox" data-playlist-song-toggle="${song.id}" ${state.playlistDraftSongIds.includes(song.id) ? "checked" : ""}>
+            <span class="playlist-song-check" aria-hidden="true"></span>
+            <div>
+              <strong>${escapeHtml(song.title)}</strong>
+              <div class="playlist-meta">
+                <span class="tag">调号 ${escapeHtml(song.key || "未填写")}</span>
+                <span class="tag">${escapeHtml(renderLevel(song.level))}</span>
+              </div>
+            </div>
+          </label>
+        </div>
+      `).join("") : `<p class="muted">没有匹配的曲目。</p>`;
+
+      const selectedSongs = state.playlistDraftSongIds
+        .map((songId) => findSong(songId))
+        .filter(Boolean);
+
+      elements.playlistSelectedList.innerHTML = selectedSongs.length
+        ? selectedSongs.map((song, index) => `
+          <div class="playlist-draft-item">
+            <div class="toolbar">
+              <strong>${index + 1}. ${escapeHtml(song.title)}</strong>
+              <div class="playlist-order-actions">
+                <button class="mini-btn" type="button" data-playlist-move="up" data-song-id="${song.id}" ${index === 0 ? "disabled" : ""}>上移</button>
+                <button class="mini-btn" type="button" data-playlist-move="down" data-song-id="${song.id}" ${index === selectedSongs.length - 1 ? "disabled" : ""}>下移</button>
+                <button class="mini-btn" type="button" data-playlist-remove="${song.id}">移除</button>
+              </div>
+            </div>
+            <div class="playlist-meta">
+              <span class="tag">调号 ${escapeHtml(song.key || "未填写")}</span>
+              <span class="tag">${escapeHtml(renderLevel(song.level))}</span>
+            </div>
+          </div>
+        `).join("")
+        : `<p class="muted">还没有加入曲目。</p>`;
+
+      elements.playlistSongOptions.querySelectorAll("[data-playlist-song-toggle]").forEach((input) => {
+        input.addEventListener("change", () => togglePlaylistDraftSong(input.dataset.playlistSongToggle, input.checked));
+      });
+      elements.playlistSelectedList.querySelectorAll("[data-playlist-move]").forEach((button) => {
+        button.addEventListener("click", () => movePlaylistDraftSong(button.dataset.songId, button.dataset.playlistMove));
+      });
+      elements.playlistSelectedList.querySelectorAll("[data-playlist-remove]").forEach((button) => {
+        button.addEventListener("click", () => removePlaylistDraftSong(button.dataset.playlistRemove));
+      });
+    }
+
+    function togglePlaylistDraftSong(songId, checked) {
+      if (checked) {
+        if (!state.playlistDraftSongIds.includes(songId)) {
+          state.playlistDraftSongIds.push(songId);
+        }
+      } else {
+        state.playlistDraftSongIds = state.playlistDraftSongIds.filter((id) => id !== songId);
+      }
+      renderPlaylistBuilder();
+    }
+
+    function movePlaylistDraftSong(songId, direction) {
+      const index = state.playlistDraftSongIds.indexOf(songId);
+      if (index < 0) {
+        return;
+      }
+      const nextIndex = direction === "up" ? index - 1 : index + 1;
+      if (nextIndex < 0 || nextIndex >= state.playlistDraftSongIds.length) {
+        return;
+      }
+      const draft = [...state.playlistDraftSongIds];
+      [draft[index], draft[nextIndex]] = [draft[nextIndex], draft[index]];
+      state.playlistDraftSongIds = draft;
+      renderPlaylistBuilder();
+    }
+
+    function removePlaylistDraftSong(songId) {
+      state.playlistDraftSongIds = state.playlistDraftSongIds.filter((id) => id !== songId);
+      renderPlaylistBuilder();
+    }
+
+    function deleteResource(songId, resourceId) {
+      const song = findSong(songId);
+      if (!song) {
+        return;
+      }
+      const resource = getSongResource(songId, resourceId);
+      if (!window.confirm(`确认删除资料“${resource?.title || ""}”？`)) {
+        return;
+      }
+      if (resource?.legacySource === "chartLink") {
+        song.chartLink = "";
+      }
+      song.resources = normalizeSongResources(song).filter((item) => item.id !== resourceId && item.legacySource !== "chartLink");
+      song.resources = syncLegacyChartLinkResource(song.resources, song.chartLink);
+      persistSongs();
+      renderSongDetail();
+    }
+
+    function deleteSong(songId) {
+      const song = findSong(songId);
+      const relatedPlaylists = state.playlists.filter((playlist) => playlist.songIds.includes(songId));
+      const prompt = relatedPlaylists.length
+        ? `曲目“${song?.title || ""}”存在于 ${relatedPlaylists.length} 个歌单中，删除后会自动从这些歌单移除。确认继续吗？`
+        : `确认删除曲目“${song?.title || ""}”？`;
+      if (!window.confirm(prompt)) {
+        return;
+      }
+
+      state.songs = state.songs.filter((item) => item.id !== songId);
+      state.playlists.forEach((playlist) => {
+        playlist.songIds = playlist.songIds.filter((id) => id !== songId);
+      });
+
+      if (state.selectedSongId === songId) {
+        state.selectedSongId = state.songs[0]?.id || null;
+        state.songMobileView = state.selectedSongId ? "detail" : "list";
+      }
+
+      persistSongs();
+      persistPlaylists();
+      render();
+    }
+
+    function deletePlaylist(playlistId) {
+      const playlist = findPlaylist(playlistId);
+      if (!window.confirm(`确认删除歌单“${playlist?.name || ""}”？`)) {
+        return;
+      }
+
+      state.playlists = state.playlists.filter((item) => item.id !== playlistId);
+      if (state.selectedPlaylistId === playlistId) {
+        state.selectedPlaylistId = state.playlists[0]?.id || null;
+        state.playlistMobileView = state.selectedPlaylistId ? "detail" : "list";
+      }
+      persistPlaylists();
+      render();
+    }
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+
+      if (id === "song-modal") {
+        state.songDraftResources = [];
+        state.editingBandScene = "withDrums";
+        state.editingBandSetupScenes = createDefaultBandSetupScenes();
+        elements.songForm.reset();
+        document.getElementById("song-id").value = "";
+        renderSongModalResources();
+      }
+
+      if (id === "playlist-modal") {
+        state.playlistDraftSongIds = [];
+        state.playlistSongSearch = "";
+        elements.playlistForm.reset();
+        document.getElementById("playlist-id").value = "";
+      }
+
+      if (id === "resource-modal") {
+        elements.resourceForm.reset();
+        document.getElementById("resource-context").value = "";
+        document.getElementById("resource-song-id").value = "";
+        document.getElementById("resource-id").value = "";
+      }
+    }
+
+    function getFilteredSongs() {
+      if (!state.songSearch) {
+        return state.songs;
+      }
+
+      return state.songs.filter((song) => song.title.toLowerCase().includes(state.songSearch));
+    }
+
+    function groupSongsByInitial(songs) {
+      const grouped = new Map();
+      songs.forEach((song) => {
+        const initial = getSongInitial(song.title);
+        if (!grouped.has(initial)) {
+          grouped.set(initial, []);
+        }
+        grouped.get(initial).push(song);
+      });
+
+      return Array.from(grouped.entries())
+        .sort(([left], [right]) => compareInitials(left, right))
+        .map(([initial, groupSongs]) => ({
+          initial,
+          songs: groupSongs.sort((left, right) => left.title.localeCompare(right.title, "zh-Hans-CN"))
+        }));
+    }
+
+    function getSongInitial(title) {
+      const value = String(title || "").trim();
+      if (!value) {
+        return "#";
+      }
+      const firstChar = value[0];
+      if (/[A-Za-z]/.test(firstChar)) {
+        return firstChar.toUpperCase();
+      }
+      if (/[0-9]/.test(firstChar)) {
+        return "#";
+      }
+      return getChinesePinyinInitial(firstChar) || "#";
+    }
+
+    function getChinesePinyinInitial(char) {
+      const boundaries = [
+        ["A", "阿"], ["B", "芭"], ["C", "擦"], ["D", "搭"], ["E", "蛾"],
+        ["F", "发"], ["G", "噶"], ["H", "哈"], ["J", "击"], ["K", "喀"],
+        ["L", "垃"], ["M", "妈"], ["N", "拿"], ["O", "哦"], ["P", "啪"],
+        ["Q", "期"], ["R", "然"], ["S", "撒"], ["T", "塌"], ["W", "挖"],
+        ["X", "昔"], ["Y", "压"], ["Z", "匝"]
+      ];
+      for (let index = boundaries.length - 1; index >= 0; index -= 1) {
+        const [letter, boundary] = boundaries[index];
+        if (char.localeCompare(boundary, "zh-Hans-CN") >= 0) {
+          return letter;
+        }
+      }
+      return "";
+    }
+
+    function compareInitials(left, right) {
+      if (left === "#" && right === "#") {
+        return 0;
+      }
+      if (left === "#") {
+        return -1;
+      }
+      if (right === "#") {
+        return 1;
+      }
+      return left.localeCompare(right, "en");
+    }
+
+    function bindCardAction(element, handler) {
+      element.addEventListener("click", handler);
+      element.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handler({ currentTarget: element });
+        }
+      });
+    }
+
+    function readBandSetupFromSongForm(existingScenes = state.editingBandSetupScenes) {
+      const scenes = normalizeBandSetupScenes(existingScenes);
+      scenes[state.editingBandScene] = {
+        vocals: getCheckedValues("song-vocals"),
+        guitars: getCheckedValues("song-guitars"),
+        bass: getSinglePickerValue("song-bass-choice"),
+        drum: getSinglePickerValue("song-drum-choice"),
+        keyboard: getSinglePickerValue("song-keyboard-choice")
+      };
+      return normalizeBandSetupScenes(scenes);
+    }
+
+    function applyBandSetupToSongForm(bandSetupScenes) {
+      const scenes = normalizeBandSetupScenes(bandSetupScenes);
+      const current = scenes[state.editingBandScene];
+
+      setCheckedValues("song-vocals", current.vocals);
+      setCheckedValues("song-guitars", current.guitars);
+      updatePickerLabel("song-vocal-toggle", "song-vocals", "请选择 vocal");
+      updatePickerLabel("song-guitar-toggle", "song-guitars", "请选择 guitar");
+      setSinglePickerValue("song-bass-choice", current.bass);
+      setSinglePickerValue("song-drum-choice", current.drum);
+      setSinglePickerValue("song-keyboard-choice", current.keyboard);
+      updatePickerLabelFromSingle("song-bass-toggle", "song-bass-choice", "请选择 bass");
+      updatePickerLabelFromSingle("song-drum-toggle", "song-drum-choice", "请选择 drum");
+      updatePickerLabelFromSingle("song-keyboard-toggle", "song-keyboard-choice", "请选择 keyboard");
+      syncBandSceneButtons();
+      syncDrumOptions();
+    }
+
+    function renderBandSetupTabs(bandSetupScenes) {
+      const scenes = normalizeBandSetupScenes(bandSetupScenes);
+      const currentScene = scenes[state.viewingBandScene] ? state.viewingBandScene : "withDrums";
+      return `
+        <div class="scene-tabs">
+          ${Object.entries(BAND_SCENES).map(([sceneKey, sceneLabel]) => `
+            <button type="button" class="scene-tab${sceneKey === currentScene ? " active" : ""}" data-action="switch-band-scene" data-scene="${sceneKey}">
+              ${sceneLabel}
+            </button>
+          `).join("")}
+        </div>
+        <div class="member-list">${renderBandSetupTags(scenes[currentScene])}</div>
+      `;
+    }
+
+    function renderBandSetupTags(setup) {
+      const normalized = normalizeBandSetup(setup, true);
+      const entries = [
+        `vocal: ${normalized.vocals.length ? normalized.vocals.join("、") : "无"}`,
+        `guitar: ${normalized.guitars.length ? normalized.guitars.join("、") : "无"}`,
+        `bass: ${normalized.bass || "无"}`,
+        `drum: ${normalized.drum || "无"}`,
+        `keyboard: ${normalized.keyboard || "无"}`
+      ];
+      return entries.map((item) => `<span class="member-tag">${escapeHtml(item)}</span>`).join("");
+    }
+
+    function summarizeBandSetup(setup) {
+      const normalized = normalizeBandSetup(setup, true);
+      const vocal = normalized.vocals.length ? normalized.vocals.join("、") : "无";
+      const guitar = normalized.guitars.length ? normalized.guitars.join("、") : "无";
+      return `vocal ${vocal} · guitar ${guitar}`;
+    }
+
+    function normalizeBandSetupScenes(bandSetupScenes) {
+      if (bandSetupScenes?.withDrums || bandSetupScenes?.withoutDrums) {
+        return {
+          withDrums: normalizeBandSetup(bandSetupScenes.withDrums, false),
+          withoutDrums: normalizeBandSetup(bandSetupScenes.withoutDrums, true)
+        };
+      }
+
+      const legacy = normalizeBandSetup(bandSetupScenes, false);
+      return {
+        withDrums: legacy,
+        withoutDrums: {
+          ...legacy,
+          vocals: [...legacy.vocals],
+          guitars: [...legacy.guitars],
+          drum: ""
+        }
+      };
+    }
+
+    function normalizeBandSetup(setup, allowNoDrum = false) {
+      if (setup) {
+        return {
+          vocals: Array.isArray(setup.vocals)
+            ? setup.vocals
+            : Array.isArray(setup.vocalists)
+              ? setup.vocalists
+              : [...DEFAULT_BAND_SETUP.vocals],
+          guitars: Array.isArray(setup.guitars)
+            ? setup.guitars
+            : [setup.rhythmGuitar, setup.leadGuitar].filter(Boolean),
+          bass: typeof setup.bass === "string" ? setup.bass : DEFAULT_BAND_SETUP.bass,
+          drum: allowNoDrum
+            ? (typeof (setup.drum ?? setup.drums) === "string" ? (setup.drum ?? setup.drums) : "")
+            : ((setup.drum ?? setup.drums) || DEFAULT_BAND_SETUP.drum),
+          keyboard: setup.keyboard || DEFAULT_BAND_SETUP.keyboard
+        };
+      }
+      return {
+        vocals: [...DEFAULT_BAND_SETUP.vocals],
+        guitars: [...DEFAULT_BAND_SETUP.guitars],
+        bass: DEFAULT_BAND_SETUP.bass,
+        drum: allowNoDrum ? "" : DEFAULT_BAND_SETUP.drum,
+        keyboard: DEFAULT_BAND_SETUP.keyboard
+      };
+    }
+
+    function createDefaultBandSetupScenes() {
+      return normalizeBandSetupScenes(null);
+    }
+
+    function bindBandSceneSwitch() {
+      document.querySelectorAll(".scenario-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          const nextScene = button.dataset.scene;
+          if (!nextScene || nextScene === state.editingBandScene) {
+            return;
+          }
+          state.editingBandSetupScenes = readBandSetupFromSongForm(state.editingBandSetupScenes);
+          state.editingBandScene = nextScene;
+          applyBandSetupToSongForm(state.editingBandSetupScenes);
+        });
+      });
+    }
+
+    function syncBandSceneButtons() {
+      document.querySelectorAll(".scenario-btn").forEach((button) => {
+        button.classList.toggle("active", button.dataset.scene === state.editingBandScene);
+      });
+    }
+
+    function syncDrumOptions() {
+      const emptyDrumOption = document.querySelector("[data-empty-drum-option]");
+      if (!emptyDrumOption) {
+        return;
+      }
+      const allowEmpty = state.editingBandScene === "withoutDrums";
+      emptyDrumOption.classList.toggle("is-hidden-option", !allowEmpty);
+
+      const currentValue = getSinglePickerValue("song-drum-choice");
+      if (!allowEmpty && !currentValue) {
+        setSinglePickerValue("song-drum-choice", DEFAULT_BAND_SETUP.drum);
+        updatePickerLabelFromSingle("song-drum-toggle", "song-drum-choice", "请选择 drum");
+      }
+    }
+
+    function bindMultiPicker(toggleId, panelId, inputName, placeholder) {
+      const toggle = document.getElementById(toggleId);
+      const panel = document.getElementById(panelId);
+      if (!toggle || !panel) {
+        return;
+      }
+
+      toggle.addEventListener("click", () => {
+        const isOpen = !panel.classList.contains("hidden");
+        panel.classList.toggle("hidden", isOpen);
+        toggle.setAttribute("aria-expanded", String(!isOpen));
+      });
+
+      document.querySelectorAll(`input[name="${inputName}"]`).forEach((input) => {
+        input.addEventListener("change", () => {
+          updatePickerLabel(toggleId, inputName, placeholder);
+          syncPickerSelectionState(inputName);
+        });
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!panel.contains(event.target) && !toggle.contains(event.target)) {
+          panel.classList.add("hidden");
+          toggle.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      updatePickerLabel(toggleId, inputName, placeholder);
+      syncPickerSelectionState(inputName);
+    }
+
+    function bindSinglePicker(toggleId, panelId, inputName, placeholder) {
+      const toggle = document.getElementById(toggleId);
+      const panel = document.getElementById(panelId);
+      if (!toggle || !panel) {
+        return;
+      }
+
+      toggle.addEventListener("click", () => {
+        const isOpen = !panel.classList.contains("hidden");
+        panel.classList.toggle("hidden", isOpen);
+        toggle.setAttribute("aria-expanded", String(!isOpen));
+      });
+
+      document.querySelectorAll(`input[name="${inputName}"]`).forEach((input) => {
+        input.addEventListener("change", () => {
+          updatePickerLabelFromSingle(toggleId, inputName, placeholder);
+          syncPickerSelectionState(inputName);
+          panel.classList.add("hidden");
+          toggle.setAttribute("aria-expanded", "false");
+        });
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!panel.contains(event.target) && !toggle.contains(event.target)) {
+          panel.classList.add("hidden");
+          toggle.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      updatePickerLabelFromSingle(toggleId, inputName, placeholder);
+      syncPickerSelectionState(inputName);
+    }
+
+    function updatePickerLabel(toggleId, inputName, placeholder) {
+      const toggle = document.getElementById(toggleId);
+      const text = toggle?.querySelector(".picker-toggle-text");
+      if (!toggle || !text) {
+        return;
+      }
+      const values = getCheckedValues(inputName);
+      text.textContent = values.length ? values.join("、") : placeholder;
+    }
+
+    function updatePickerLabelFromSingle(toggleId, inputName, placeholder) {
+      const toggle = document.getElementById(toggleId);
+      const text = toggle?.querySelector(".picker-toggle-text");
+      if (!toggle || !text) {
+        return;
+      }
+      const value = getSinglePickerValue(inputName);
+      text.textContent = value || "不选" || placeholder;
+      if (!value && placeholder.includes("keyboard")) {
+        text.textContent = placeholder;
+      }
+      if (!value && placeholder.includes("drum")) {
+        text.textContent = state.editingBandScene === "withoutDrums" ? "不选" : placeholder;
+      }
+      if (!value && placeholder.includes("bass")) {
+        text.textContent = "不选";
+      }
+    }
+
+    function getCheckedValues(name) {
+      return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map((input) => input.value);
+    }
+
+    function setCheckedValues(name, values) {
+      document.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+        input.checked = values.includes(input.value);
+      });
+    }
+
+    function getSinglePickerValue(name) {
+      const element = document.querySelector(`input[name="${name}"]:checked`);
+      return element ? element.value : "";
+    }
+
+    function setSinglePickerValue(name, value) {
+      const options = document.querySelectorAll(`input[name="${name}"]`);
+      let matched = false;
+      options.forEach((input) => {
+        const shouldCheck = input.value === value;
+        input.checked = shouldCheck;
+        if (shouldCheck) {
+          matched = true;
+        }
+      });
+      if (!matched) {
+        const emptyOption = Array.from(options).find((input) => input.value === "");
+        if (emptyOption) {
+          emptyOption.checked = true;
+        }
+      }
+      syncPickerSelectionState(name);
+    }
+
+    function syncPickerSelectionState(name) {
+      document.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+        const option = input.closest("label");
+        if (option) {
+          option.classList.toggle("is-selected", input.checked);
+        }
+      });
+    }
+
+    function loadSongs() {
+      try {
+        const stored = localStorage.getItem(SONG_STORAGE_KEY) || localStorage.getItem(SONG_STORAGE_FALLBACK_KEY);
+        if (!stored) {
+          return [];
+        }
+        const parsed = JSON.parse(stored);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+        return parsed.map((song) => ({
+          id: song.id || createId(),
+          title: song.title || "",
+          key: song.key || "",
+          level: normalizeLevel(song.level),
+          chartLink: getLegacyChartLink(song),
+          bandSetup: normalizeBandSetupScenes(song.bandSetup),
+          resources: normalizeSongResources(song),
+          chordProgression: normalizeMultilineText(song.chordProgression || song.lyricsChords || ""),
+          lyrics: normalizeMultilineText(song.lyrics || (song.lyricsChords ? DEFAULT_LYRICS_TEMPLATE : ""))
+        }));
+      } catch (error) {
+        console.error("Failed to load songs", error);
+        return [];
+      }
+    }
+
+    function loadPlaylists() {
+      try {
+        const stored = localStorage.getItem(PLAYLIST_STORAGE_KEY);
+        if (!stored) {
+          return [];
+        }
+        const parsed = JSON.parse(stored);
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+        return parsed.map((playlist) => ({
+          id: playlist.id || createId(),
+          name: playlist.name || "",
+          scene: playlist.scene || "路边演出",
+          notes: playlist.notes || "",
+          songIds: Array.isArray(playlist.songIds) ? playlist.songIds : []
+        }));
+      } catch (error) {
+        console.error("Failed to load playlists", error);
+        return [];
+      }
+    }
+
+    function persistSongs() {
+      localStorage.setItem(SONG_STORAGE_KEY, JSON.stringify(state.songs));
+      localStorage.setItem(SONG_STORAGE_FALLBACK_KEY, JSON.stringify(state.songs));
+    }
+
+    function normalizeSongResources(song) {
+      const baseResources = Array.isArray(song?.resources)
+        ? song.resources.map((resource, index) => normalizeResourceItem(resource, index))
+        : [];
+      const legacyLink = getLegacyChartLink(song);
+      return syncLegacyChartLinkResource(baseResources, legacyLink);
+    }
+
+    function normalizeResourceItem(resource, index) {
+      return {
+        id: resource?.id || `resource-${index}-${Math.random().toString(36).slice(2, 7)}`,
+        role: resource?.role || "",
+        title: resource?.title || "未命名资料",
+        type: "其他",
+        url: resource?.url || "",
+        note: resource?.note || "",
+        legacySource: resource?.legacySource || ""
+      };
+    }
+
+    function getLegacyChartLink(song) {
+      return normalizeMultilineText(song?.chartLink || song?.scoreLink || song?.["谱子链接"] || "").trim();
+    }
+
+    function syncLegacyChartLinkResource(resources, chartLink) {
+      const nextResources = (resources || [])
+        .map((resource, index) => normalizeResourceItem(resource, index))
+        .filter((resource) => resource.legacySource !== "chartLink");
+
+      if (!chartLink) {
+        return nextResources;
+      }
+
+      nextResources.push({
+        id: "legacy-chart-link",
+        role: "其他",
+        title: "旧版谱子链接",
+        type: "其他",
+        url: chartLink,
+        note: "由旧谱子链接自动迁移",
+        legacySource: "chartLink"
+      });
+      return nextResources;
+    }
+
+    function getSongResource(songId, resourceId) {
+      const song = findSong(songId);
+      if (!song) {
+        return null;
+      }
+      return normalizeSongResources(song).find((resource) => resource.id === resourceId) || null;
+    }
+
+    function persistPlaylists() {
+      localStorage.setItem(PLAYLIST_STORAGE_KEY, JSON.stringify(state.playlists));
+    }
+
+    function normalizeMultilineText(value) {
+      return String(value || "")
+        .replace(/\\r\\n/g, "\n")
+        .replace(/\\n/g, "\n")
+        .replace(/\r\n/g, "\n");
+    }
+
+    function findSong(id) {
+      return state.songs.find((song) => song.id === id) || null;
+    }
+
+    function findPlaylist(id) {
+      return state.playlists.find((playlist) => playlist.id === id) || null;
+    }
+
+    function syncMobileLayout() {
+      const narrow = window.innerWidth <= 960;
+
+      if (!narrow) {
+        elements.songListView.classList.remove("hidden");
+        elements.songDetailView.classList.remove("hidden");
+        elements.playlistListView.classList.remove("hidden");
+        elements.playlistDetailView.classList.remove("hidden");
+        return;
+      }
+
+      const showSongDetail = state.songMobileView === "detail" && Boolean(state.selectedSongId);
+      elements.songListView.classList.toggle("hidden", showSongDetail);
+      elements.songDetailView.classList.toggle("hidden", !showSongDetail);
+
+      const showPlaylistDetail = state.playlistMobileView === "detail" && Boolean(state.selectedPlaylistId);
+      elements.playlistListView.classList.toggle("hidden", showPlaylistDetail);
+      elements.playlistDetailView.classList.toggle("hidden", !showPlaylistDetail);
+    }
+
+    function normalizeLevel(level) {
+      const numeric = Number(level);
+      if (numeric >= 5) {
+        return 4;
+      }
+      if (numeric >= 4) {
+        return 3;
+      }
+      if (numeric >= 2) {
+        return 2;
+      }
+      return 1;
+    }
+
+    function renderLevel(level) {
+      return LEVEL_LABELS[normalizeLevel(level)] || LEVEL_LABELS[1];
+    }
+
+    function createId() {
+      return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+  </script>
+</body>
+</html>
