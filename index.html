@@ -388,30 +388,46 @@
 
     .alpha-index {
       position: fixed;
-      right: 10px;
+      right: max(10px, calc((100vw - 1240px) / 2 + 10px));
       top: 50%;
       transform: translateY(-50%);
       z-index: 20;
       display: grid;
-      gap: 6px;
-      padding: 8px 5px;
-      border: 1px solid rgba(98, 146, 197, 0.14);
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.28);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 16px 30px rgba(114, 153, 197, 0.16);
+      gap: 5px;
+      padding: 7px 4px;
+      border: 1px solid rgba(98, 146, 197, 0.12);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 24px rgba(114, 153, 197, 0.1);
+      opacity: 0.38;
+      transition: opacity 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+    }
+
+    .alpha-index:hover,
+    .alpha-index:focus-within {
+      opacity: 0.92;
+      transform: translateY(calc(-50% - 2px));
+      background: rgba(255, 255, 255, 0.82);
     }
 
     .alpha-index-btn {
-      width: 30px;
-      min-height: 30px;
+      width: 28px;
+      min-height: 28px;
       padding: 0;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.2);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.3);
       color: var(--primary-strong);
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      box-shadow: inset 0 0 0 1px rgba(24, 183, 165, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(24, 183, 165, 0.1);
+      transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+
+    .alpha-index-btn:hover,
+    .alpha-index-btn:focus-visible {
+      background: rgba(24, 183, 165, 0.16);
+      transform: scale(1.04);
     }
 
     .detail-panel {
@@ -1146,15 +1162,16 @@
 
       .alpha-index {
         right: 8px;
-        gap: 5px;
-        padding: 7px 4px;
-        border-radius: 16px;
+        top: 50%;
+        gap: 4px;
+        padding: 6px 4px;
+        border-radius: 14px;
       }
 
       .alpha-index-btn {
-        width: 28px;
-        min-height: 28px;
-        font-size: 0.78rem;
+        width: 26px;
+        min-height: 26px;
+        font-size: 0.74rem;
       }
     }
   </style>
@@ -1356,7 +1373,7 @@
   </div>
 
   <script>
-    const WORKER_API_BASE = "https://legalband-api.18210807337.workers.dev";
+    const WORKER_API_BASE = "https://api.lglband.cn";
     const DATA_API_PATH = "/api/data";
     const LOCAL_BACKUP_KEY = "legalband-api-backup";
     const DEFAULT_LYRICS_TEMPLATE = ["Intro", "A段主歌", "B段副歌", "桥段", "结尾"]
@@ -1579,7 +1596,7 @@
               <span class="tag">调号 ${escapeHtml(song.key || "未填写")}</span>
               <span class="tag">${escapeHtml(renderLevel(song.level))}</span>
               ${resources.length ? `<span class="tag">有资料</span>` : ""}
-              ${song.chordProgression || song.lyrics ? `<span class="tag">有歌词与和弦</span>` : ""}
+              ${hasMeaningfulSongNotes(song) ? `<span class="tag">有歌词与和弦</span>` : ""}
             </div>
           `;
           group.appendChild(card);
@@ -2592,6 +2609,31 @@
         .replace(/\\r\\n/g, "\n")
         .replace(/\\n/g, "\n")
         .replace(/\r\n/g, "\n");
+    }
+
+    function hasMeaningfulSongNotes(song) {
+      const chords = normalizeMultilineText(song?.chordProgression).trim();
+      if (chords) {
+        return true;
+      }
+
+      const lyrics = normalizeMultilineText(song?.lyrics).trim();
+      if (!lyrics) {
+        return false;
+      }
+
+      const defaultMarkers = new Set(
+        DEFAULT_LYRICS_TEMPLATE
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)
+      );
+
+      return lyrics
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .some((line) => !defaultMarkers.has(line));
     }
 
     function findSong(id) {
