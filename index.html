@@ -388,7 +388,7 @@
 
     .alpha-index {
       position: fixed;
-      right: max(10px, calc((100vw - 1240px) / 2 + 10px));
+      right: 8px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 20;
@@ -401,6 +401,7 @@
       backdrop-filter: blur(10px);
       box-shadow: 0 10px 24px rgba(114, 153, 197, 0.1);
       opacity: 0.38;
+      pointer-events: auto;
       transition: opacity 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
     }
 
@@ -412,10 +413,10 @@
     }
 
     .alpha-index-btn {
-      width: 28px;
-      min-height: 28px;
+      width: 30px;
+      min-height: 30px;
       padding: 0;
-      border-radius: 9px;
+      border-radius: 10px;
       background: rgba(255, 255, 255, 0.3);
       color: var(--primary-strong);
       font-size: 0.78rem;
@@ -428,6 +429,12 @@
     .alpha-index-btn:focus-visible {
       background: rgba(24, 183, 165, 0.16);
       transform: scale(1.04);
+    }
+
+    .alpha-index-btn.is-active {
+      background: linear-gradient(135deg, #18b7a5, #17a0d2);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(23, 160, 210, 0.18);
     }
 
     .detail-panel {
@@ -572,6 +579,10 @@
 
     .back-btn {
       margin-bottom: 12px;
+    }
+
+    .mobile-return-bar {
+      display: none;
     }
 
     .mobile-only {
@@ -1072,8 +1083,27 @@
         min-height: auto;
       }
 
+      .mobile-return-bar {
+        position: sticky;
+        top: 8px;
+        z-index: 8;
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 14px;
+        padding: 8px;
+        border: 1px solid rgba(98, 146, 197, 0.12);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 12px 28px rgba(114, 153, 197, 0.12);
+      }
+
       .mobile-only {
         display: inline-flex;
+      }
+
+      .panel:has(#song-detail-content):not(.hidden) {
+        padding-top: 22px;
       }
     }
 
@@ -1127,7 +1157,8 @@
         align-items: flex-start;
       }
 
-      .context-return-bar {
+      .context-return-bar,
+      .mobile-return-bar {
         top: 6px;
         margin-bottom: 12px;
         padding: 7px;
@@ -1163,15 +1194,21 @@
       .alpha-index {
         right: 8px;
         top: 50%;
-        gap: 4px;
-        padding: 6px 4px;
-        border-radius: 14px;
+        transform: translateY(-50%);
+        gap: 5px;
+        padding: 7px 4px;
+        border-radius: 16px;
+      }
+
+      .alpha-index:hover,
+      .alpha-index:focus-within {
+        transform: translateY(calc(-50% - 2px));
       }
 
       .alpha-index-btn {
-        width: 26px;
-        min-height: 26px;
-        font-size: 0.74rem;
+        width: 28px;
+        min-height: 28px;
+        font-size: 0.78rem;
       }
     }
   </style>
@@ -1201,7 +1238,7 @@
         <section id="song-list-view" class="panel">
           <div class="section-head">
             <div>
-              <h2>曲目列表</h2>
+              <h2 id="song-list-heading">曲目列表</h2>
               <p id="song-count" class="muted"></p>
             </div>
             <label class="search-field">
@@ -1213,11 +1250,12 @@
           <div id="song-empty" class="empty-state hidden">
             <p>还没有曲目，先新增一首歌吧。</p>
           </div>
-          <div id="alpha-index" class="alpha-index hidden" aria-label="首字母索引"></div>
         </section>
 
         <section id="song-detail-view" class="panel detail-panel hidden">
-          <button id="song-back-btn" class="ghost-btn back-btn mobile-only">返回曲目列表</button>
+          <div id="song-mobile-return-bar" class="mobile-return-bar hidden">
+            <button id="song-back-btn" class="page-action-btn mobile-only">返回曲目列表</button>
+          </div>
           <div id="song-detail-content"></div>
         </section>
       </section>
@@ -1243,6 +1281,8 @@
       </section>
     </main>
   </div>
+
+  <div id="alpha-index" class="alpha-index hidden" aria-label="首字母索引"></div>
 
   <div id="song-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-card">
@@ -1397,7 +1437,8 @@
       songMobileView: "list",
       playlistMobileView: "list",
       songDraftResources: [],
-      playlistDraftSongIds: []
+      playlistDraftSongIds: [],
+      activeAlphaLetter: ""
     };
 
     const elements = {
@@ -1415,6 +1456,8 @@
       songDetailContent: document.getElementById("song-detail-content"),
       songListView: document.getElementById("song-list-view"),
       songBackBtn: document.getElementById("song-back-btn"),
+      songMobileReturnBar: document.getElementById("song-mobile-return-bar"),
+      songListHeading: document.getElementById("song-list-heading"),
       alphaIndex: document.getElementById("alpha-index"),
       playlistCount: document.getElementById("playlist-count"),
       playlistList: document.getElementById("playlist-list"),
@@ -1522,6 +1565,7 @@
       });
 
       window.addEventListener("resize", syncMobileLayout);
+      window.addEventListener("scroll", updateAlphaIndexState, { passive: true });
     }
 
     function switchModule(module) {
@@ -1532,6 +1576,7 @@
       renderModuleTabs();
       renderModuleViews();
       syncMobileLayout();
+      updateAlphaIndexState();
     }
 
     function render() {
@@ -1542,6 +1587,7 @@
       renderPlaylistDetail();
       renderModuleViews();
       syncMobileLayout();
+      updateAlphaIndexState();
     }
 
     function renderModuleTabs() {
@@ -1556,7 +1602,7 @@
       const isSongs = state.module === "songs";
       elements.songsModule.classList.toggle("hidden", !isSongs);
       elements.playlistsModule.classList.toggle("hidden", isSongs);
-      elements.alphaIndex.classList.toggle("hidden", !isSongs || elements.alphaIndex.innerHTML === "");
+      updateAlphaIndexState();
     }
 
     function renderSongList() {
@@ -1566,6 +1612,7 @@
       elements.songList.innerHTML = "";
       elements.alphaIndex.innerHTML = "";
       elements.alphaIndex.classList.add("hidden");
+      state.activeAlphaLetter = "";
 
       if (filteredSongs.length === 0 && state.songs.length > 0) {
         elements.songList.innerHTML = `<div class="detail-empty"><p>没有匹配的曲目。</p></div>`;
@@ -1577,6 +1624,7 @@
         const group = document.createElement("section");
         group.className = "song-group";
         group.id = `group-${initial === "#" ? "hash" : initial.toLowerCase()}`;
+        group.dataset.initial = initial;
         group.innerHTML = `<h3 class="song-group-title">${escapeHtml(initial)}</h3>`;
 
         songs.forEach((song) => {
@@ -1614,13 +1662,13 @@
 
     function renderAlphaIndex(groupedSongs) {
       if (!groupedSongs.length) {
+        updateAlphaIndexState();
         return;
       }
 
       elements.alphaIndex.innerHTML = groupedSongs.map(({ initial }) => `
         <button type="button" class="alpha-index-btn" data-letter-target="${initial}">${escapeHtml(initial)}</button>
       `).join("");
-      elements.alphaIndex.classList.remove("hidden");
 
       elements.alphaIndex.querySelectorAll("[data-letter-target]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -1629,14 +1677,70 @@
           const target = document.getElementById(targetId);
           if (target) {
             target.scrollIntoView({ behavior: "smooth", block: "start" });
+            state.activeAlphaLetter = initial;
+            updateAlphaIndexActiveState();
           }
         });
+      });
+
+      updateAlphaIndexState();
+      updateAlphaIndexActiveState();
+    }
+
+    function updateAlphaIndexState() {
+      const hasLetters = Boolean(elements.alphaIndex.innerHTML.trim());
+      const inSongsTab = state.module === "songs";
+      const heading = elements.songListHeading;
+      const songListVisible = !elements.songListView.classList.contains("hidden");
+      const detailVisible = !elements.songDetailView.classList.contains("hidden");
+      const shouldFloat = songListVisible && !detailVisible;
+
+      if (!hasLetters || !inSongsTab || !heading || !shouldFloat) {
+        elements.alphaIndex.classList.add("hidden");
+        return;
+      }
+
+      const headingRect = heading.getBoundingClientRect();
+      const shouldShow = headingRect.top <= 88;
+      elements.alphaIndex.classList.toggle("hidden", !shouldShow);
+
+      if (shouldShow) {
+        updateActiveAlphaFromScroll();
+      }
+    }
+
+    function updateActiveAlphaFromScroll() {
+      const groups = Array.from(document.querySelectorAll(".song-group[data-initial]"));
+      if (!groups.length) {
+        state.activeAlphaLetter = "";
+        updateAlphaIndexActiveState();
+        return;
+      }
+
+      const viewportAnchor = Math.max(110, Math.min(window.innerHeight * 0.3, 220));
+      let activeLetter = groups[0].dataset.initial || "";
+
+      groups.forEach((group) => {
+        const rect = group.getBoundingClientRect();
+        if (rect.top <= viewportAnchor) {
+          activeLetter = group.dataset.initial || activeLetter;
+        }
+      });
+
+      state.activeAlphaLetter = activeLetter;
+      updateAlphaIndexActiveState();
+    }
+
+    function updateAlphaIndexActiveState() {
+      elements.alphaIndex.querySelectorAll("[data-letter-target]").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.letterTarget === state.activeAlphaLetter);
       });
     }
 
     function renderSongDetail() {
       const song = findSong(state.selectedSongId);
       elements.songBackBtn.classList.toggle("hidden", state.songDetailSource === "playlist");
+      elements.songMobileReturnBar.classList.toggle("hidden", state.songDetailSource === "playlist");
       if (!song) {
         elements.songDetailContent.innerHTML = `
           <div class="detail-empty">
@@ -1656,10 +1760,11 @@
       const lyricsPreview = song.lyrics
         ? `<pre class="lyrics-preview">${escapeHtml(song.lyrics)}</pre>`
         : `<div class="detail-empty compact-empty"><p>还没有填写歌词。</p></div>`;
-      const playlistReturnBar = state.songDetailSource === "playlist" && state.selectedPlaylistId
+      const sourcePlaylist = state.songDetailSource === "playlist" ? findPlaylist(state.selectedPlaylistId) : null;
+      const playlistReturnBar = sourcePlaylist
         ? `
           <div class="context-return-bar">
-            <button class="page-action-btn" type="button" data-action="return-to-playlist">返回歌单</button>
+            <button class="page-action-btn" type="button" data-action="return-to-playlist">返回${escapeHtml(sourcePlaylist.name || "歌单")}</button>
           </div>
         `
         : "";
@@ -1834,27 +1939,21 @@
       }
 
       const songs = playlist.songIds.map(findSong).filter(Boolean);
+      const noteLine = playlist.notes
+        ? `<p class="playlist-notes">${escapeHtml(playlist.notes)}</p>`
+        : "";
       elements.playlistDetailContent.innerHTML = `
         <section class="summary-card">
           <div class="detail-header">
             <div>
               <h2>${escapeHtml(playlist.name)}</h2>
               <p class="muted">${songs.length} 首曲目</p>
+              ${noteLine}
             </div>
             <div class="inline-actions">
               <button class="page-action-btn" type="button" data-action="edit-playlist" data-id="${playlist.id}" aria-label="编辑歌单" title="编辑歌单">🖊️ 编辑</button>
               <button class="page-action-btn danger" type="button" data-action="delete-playlist" data-id="${playlist.id}" aria-label="删除歌单" title="删除歌单">🗑️ 删除</button>
             </div>
-          </div>
-        </section>
-        <section class="summary-card info-grid">
-          <div>
-            <p class="info-label">歌单名称</p>
-            <p class="info-value">${escapeHtml(playlist.name)}</p>
-          </div>
-          <div class="full-span">
-            <p class="info-label">备注</p>
-            <p class="info-value">${escapeHtml(playlist.notes || "暂无备注")}</p>
           </div>
         </section>
         <section class="summary-card">
@@ -1900,7 +1999,7 @@
     }
 
     function handleSongActions(event) {
-      const { action, id, songId, scene } = event.currentTarget.dataset;
+      const { action, id, songId } = event.currentTarget.dataset;
 
       if (action === "view-song") {
         state.songDetailSource = "songs";
@@ -1947,7 +2046,6 @@
         deleteResource(songId, id);
         return;
       }
-
     }
 
     function handlePlaylistActions(event) {
@@ -2652,6 +2750,7 @@
         elements.songDetailView.classList.remove("hidden");
         elements.playlistListView.classList.remove("hidden");
         elements.playlistDetailView.classList.remove("hidden");
+        updateAlphaIndexState();
         return;
       }
 
@@ -2662,6 +2761,7 @@
       const showPlaylistDetail = state.playlistMobileView === "detail" && Boolean(state.selectedPlaylistId);
       elements.playlistListView.classList.toggle("hidden", showPlaylistDetail);
       elements.playlistDetailView.classList.toggle("hidden", !showPlaylistDetail);
+      updateAlphaIndexState();
     }
 
     function normalizeLevel(level) {
