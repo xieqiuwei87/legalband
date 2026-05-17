@@ -1394,6 +1394,7 @@
     const WORKER_API_BASE = "https://api.lglband.cn";
     const DATA_API_PATH = "/api/data";
     const LOCAL_BACKUP_KEY = "legalband-api-backup";
+    const VIEW_STATE_KEY = "legalband-view-state";
     const DEFAULT_LYRICS_TEMPLATE = ["Intro", "A段主歌", "B段副歌", "桥段", "结尾"]
       .map((section) => `[${section}]`)
       .join("\n\n");
@@ -1482,7 +1483,9 @@
 
       try {
         await loadRemoteData();
+        restorePersistedViewState();
         render();
+        restoreTabScrollPosition(getActiveTopTab());
       } catch (error) {
         console.error("Worker API init failed", error);
         const backupData = loadLocalBackup();
@@ -1498,7 +1501,9 @@
             : [];
           state.selectedSongId = state.songs[0]?.id || null;
           state.selectedPlaylistId = state.playlists[0]?.id || null;
+          restorePersistedViewState();
           render();
+          restoreTabScrollPosition(getActiveTopTab());
           return;
         }
         elements.songCount.textContent = "数据加载失败";
@@ -1531,11 +1536,13 @@
         syncMobileLayout();
         renderModuleTabs();
         renderModuleViews();
+        persistViewState();
         restoreTabScrollPosition("songs");
       });
       elements.playlistBackBtn.addEventListener("click", () => {
         state.playlistMobileView = "list";
         syncMobileLayout();
+        persistViewState();
         restoreTabScrollPosition("playlists");
       });
 
@@ -1560,6 +1567,7 @@
       window.addEventListener("resize", syncMobileLayout);
       window.addEventListener("resize", updateAlphaIndexState);
       window.addEventListener("scroll", handleWindowScroll, { passive: true });
+      window.addEventListener("beforeunload", persistViewState);
     }
 
     function switchModule(module) {
@@ -1578,6 +1586,7 @@
       renderPlaylistDetail();
       renderModuleViews();
       syncMobileLayout();
+      persistViewState();
     }
 
     function scrollSongDetailToStart() {
@@ -1674,6 +1683,67 @@
           behavior: "auto"
         });
       });
+    }
+
+    function persistViewState() {
+      try {
+        const payload = {
+          module: state.module,
+          selectedSongId: state.selectedSongId,
+          selectedPlaylistId: state.selectedPlaylistId,
+          songDetailSource: state.songDetailSource,
+          songMobileView: state.songMobileView,
+          playlistMobileView: state.playlistMobileView,
+          tabScrollPositions: state.tabScrollPositions,
+          tabViewStates: state.tabViewStates
+        };
+        localStorage.setItem(VIEW_STATE_KEY, JSON.stringify(payload));
+      } catch (error) {
+        console.warn("Failed to persist view state", error);
+      }
+    }
+
+    function restorePersistedViewState() {
+      try {
+        const raw = localStorage.getItem(VIEW_STATE_KEY);
+        if (!raw) {
+          return;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") {
+          return;
+        }
+
+        const restoredModule = parsed.module === "playlists" ? "playlists" : "songs";
+        const restoredSongId = findSong(parsed.selectedSongId)?.id || state.songs[0]?.id || null;
+        const restoredPlaylistId = findPlaylist(parsed.selectedPlaylistId)?.id || state.playlists[0]?.id || null;
+        const restoredSongSource = parsed.songDetailSource === "playlist" && restoredPlaylistId ? "playlist" : "songs";
+
+        state.module = restoredModule;
+        state.selectedSongId = restoredSongId;
+        state.selectedPlaylistId = restoredPlaylistId;
+        state.songDetailSource = restoredSongSource;
+        state.songMobileView = parsed.songMobileView === "detail" ? "detail" : "list";
+        state.playlistMobileView = parsed.playlistMobileView === "detail" ? "detail" : "list";
+        state.tabScrollPositions = {
+          songs: Number(parsed.tabScrollPositions?.songs || 0),
+          playlists: Number(parsed.tabScrollPositions?.playlists || 0)
+        };
+        state.tabViewStates = {
+          songs: {
+            songDetailSource: "songs",
+            songMobileView: parsed.tabViewStates?.songs?.songMobileView === "detail" ? "detail" : "list",
+            selectedSongId: findSong(parsed.tabViewStates?.songs?.selectedSongId)?.id || restoredSongId
+          },
+          playlists: {
+            playlistMobileView: parsed.tabViewStates?.playlists?.playlistMobileView === "detail" ? "detail" : "list",
+            selectedPlaylistId: findPlaylist(parsed.tabViewStates?.playlists?.selectedPlaylistId)?.id || restoredPlaylistId
+          }
+        };
+      } catch (error) {
+        console.warn("Failed to restore view state", error);
+      }
     }
 
     function renderModuleTabs() {
@@ -2100,6 +2170,7 @@
         renderSongList();
         renderSongDetail();
         syncMobileLayout();
+        persistViewState();
         scrollSongDetailToStart();
         return;
       }
@@ -2120,6 +2191,7 @@
         renderModuleTabs();
         renderModuleViews();
         syncMobileLayout();
+        persistViewState();
         restoreTabScrollPosition("playlists");
         return;
       }
@@ -2153,6 +2225,7 @@
         renderPlaylistList();
         renderPlaylistDetail();
         syncMobileLayout();
+        persistViewState();
         return;
       }
 
@@ -2175,6 +2248,7 @@
           state.songMobileView = "detail";
         }
         render();
+        persistViewState();
       }
     }
 
